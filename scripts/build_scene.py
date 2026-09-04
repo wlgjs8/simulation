@@ -63,9 +63,36 @@ MOUNT_FRAME = {"left": "stand_left_arm_base", "right": "stand_right_arm_base"}
 SHAFT_R, SHAFT_L = 0.006, 0.025
 HEAD_R, HEAD_L = 0.0092, 0.012
 
+# TABLE HEIGHT. z = 0 is the STAND frame origin, not the table. On the RB3 cell the two
+# were assumed coincident -- an assumption inherited from the montage and never measured.
+# The RB5 build makes it false and by a lot: the stand is raised on a 280 mm rectangular
+# riser the operator assembled between the table and the stand base (operator, 2026-09-05).
+# The stand's own base plate reaches 15 mm below the stand origin, so the table top sits at
+#     -0.015 - 0.280 = -0.295
+# CORROBORATION, from four teleop sessions on 2026-09-04 (594k ticks of
+# {left,right}_tcp_actual_stand_* in robotics_lab/logs): over the pile region (x < 0.60) the
+# TCP bottoms out at p1 = -0.283 (left) / -0.291 (right). Fingertips stopping a few mm above
+# the table with a 12 mm bolt between them is exactly right. The old z = 0 put this rig's
+# whole scene 295 mm too high.
+TABLE_Z = -0.295
+RISER_H = 0.280           # table top -> stand base plate
 TABLE = dict(cx=0.55, cy=0.0, hx=0.50, hy=0.55, thick=0.012)
-PILE_X = 0.47
-PILE_DY = 0.16
+# RISER. Same xy as the stand footprint, by operator instruction. Measured off
+# dual_rb5_850e_stand_ver2.stl: bbox x [-0.120, 0.2815], y +-0.2607, and the plate bottom at
+# z = -0.015. It is a real collidable object -- the arms reach 280 mm below the stand now, so
+# leaving it out would let them swing through the thing that is actually in the way.
+RISER = dict(cx=0.0807, cy=0.0, hx=0.2007, hy=0.2607)
+# PILE / BOX, from the same 594k-tick teleop extract. Deep points (z < -0.24, i.e. actual
+# picks) cluster at x p50 0.458 / 0.452 and y p50 +0.051 (left, gray) / -0.041 (right, black).
+# THE PILES ARE NEARLY TOUCHING ON THE REAL CELL -- 92 mm apart, against the 320 mm this rig
+# had. That is a genuine difficulty change, not a coordinate fix: it raises the nearest-bolt
+# ambiguity the T1 metrics measure, so compare margin buckets, not raw grasp counts, across
+# the port.
+PILE_X = 0.455
+PILE_DY = 0.046
+# Box centres are UNCHANGED. The release points measured at x 0.762/0.767 and y +0.253/-0.310
+# both fall inside a 380 x 240 box centred here, so the data corroborates the existing
+# placement rather than contradicting it; releases simply are not at the box centre.
 BOX_X = 0.72   # operator: fine anywhere within reach, but closer to the robot is better
 BOX_DY = 0.215   # 430 mm apart: 380 mm long side + a 50 mm gap
 # NPC NTC-321, measured: 380 x 240 x 105 mm outer, 20 mm side wall, 6.5 mm floor,

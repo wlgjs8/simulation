@@ -1,0 +1,132 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.3"
+    }
+    doc = """Generated from Composed Stage of root layer /tmp/tmp1s08jhha/dual_rb5_850e_stand_only.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_dual_rb5_850e_stand_only_uuociumh/usdex_dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_dual_rb5_850e_stand_only_uuociumh/temp_dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+over "dual_rb5_850e_stand_only"
+{
+    over "Geometry"
+    {
+        over "world"
+        {
+            over "base"
+            {
+                over "stand"
+                {
+                    over "stand_collision"
+                    {
+                        over "stand_hull_000"
+                        {
+                        }
+
+                        over "stand_hull_001"
+                        {
+                        }
+
+                        over "stand_hull_002"
+                        {
+                        }
+
+                        over "stand_hull_003"
+                        {
+                        }
+
+                        over "stand_hull_004"
+                        {
+                        }
+
+                        over "stand_hull_005"
+                        {
+                        }
+
+                        over "stand_hull_006"
+                        {
+                        }
+
+                        over "stand_hull_007"
+                        {
+                        }
+
+                        over "stand_hull_008"
+                        {
+                        }
+
+                        over "stand_hull_009"
+                        {
+                        }
+
+                        over "stand_hull_010"
+                        {
+                        }
+
+                        over "stand_hull_011"
+                        {
+                        }
+
+                        over "stand_hull_012"
+                        {
+                        }
+
+                        over "stand_hull_013"
+                        {
+                        }
+
+                        over "stand_hull_014"
+                        {
+                        }
+
+                        over "stand_hull_015"
+                        {
+                        }
+
+                        over "stand_hull_016"
+                        {
+                        }
+
+                        over "stand_hull_017"
+                        {
+                        }
+
+                        over "stand_hull_018"
+                        {
+                        }
+
+                        over "stand_hull_019"
+                        {
+                        }
+                    }
+
+                    over "stand_left_arm_base"
+                    {
+                    }
+
+                    over "stand_right_arm_base"
+                    {
+                    }
+
+                    over "dual_rb5_850e_stand_ver2"
+                    {
+                    }
+                }
+            }
+        }
+    }
+
+    over "Physics"
+    {
+    }
+}
+

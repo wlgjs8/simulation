@@ -36,6 +36,7 @@ lie, but it would still be a wasted run.
 from __future__ import annotations
 
 import pathlib
+import re
 import shutil
 
 from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade
@@ -137,17 +138,45 @@ def _patch_base(path):
     """Repoint both finger children at the new layer. Instancing is deliberately dropped:
     the original bundle instanced one collider per finger, this one has ~24, and a
     mis-composed instance proxy is far harder to diagnose than the few MB it would save
-    across the two arms in the scene."""
+    across the two arms in the scene.
+
+    Matched by REGEX, not by a literal block: the leading indentation encodes how deep the
+    finger link sits in the USD, and that depth is a property of the ARM (RB5 has a longer
+    link chain than RB3). Hardcoding it made this patch silently arm-specific -- it aborted
+    on the first RB5 import, 2026-09-05. The indent is captured and reused so the rewritten
+    block stays aligned with its neighbours.
+    """
     txt = path.read_text()
     n = 0
+    # WHICH VISUALS THE IMPORT ALREADY HAS. The RB3 display URDF draws one monolithic
+    # `pika_finger_<side>`, so the v15 visual had to be grafted in. The RB5 display URDF
+    # (robotics_lab make_rb5_850e_urdfs.py build_display) already references
+    # pika_finger_<side>_{pla,tpu}.STL -- the printed tip is native there, and repointing it
+    # would replace the correct meshes with an identical copy. Detected, not configured, so
+    # a future arm cannot pick the wrong branch by forgetting a flag.
+    native_v15 = '"pika_finger_left_pla"' in txt
+    targets = ((("_hull", "tip_v15_col", "col"),) if native_v15
+               else (("", "tip_v15_vis", "vis"), ("_hull", "tip_v15_col", "col")))
+    print(f"  base.usda: v15 visuals {'already native (collider only)' if native_v15 else 'grafted'}")
     for side in ("left", "right"):
-        for suffix, name, part in (("", "tip_v15_vis", "vis"), ("_hull", "tip_v15_col", "col")):
-            old = _OLD.format(side=side, suffix=suffix)
-            if old not in txt:
-                raise SystemExit(f"ABORT: base.usda does not contain the expected "
-                                 f"pika_finger_{side}{suffix} block -- the asset was "
-                                 f"re-imported and this patch is stale.")
-            txt = txt.replace(old, _NEW.format(name=name, side=side, part=part), 1)
+        for suffix, name, part in targets:
+            pat = re.compile(
+                r'^(?P<ind>[ \t]*)def Xform "pika_finger_' + side + suffix + r'" \(\n'
+                r'(?P=ind)    instanceable = true\n'
+                r'(?P=ind)    prepend references = @\./instances\.usda@</Instances/'
+                + f"pika_finger_{side}{suffix}" + r'>\n'
+                r'(?P=ind)\)',
+                re.MULTILINE)
+            m = pat.search(txt)
+            if m is None:
+                raise SystemExit(f"ABORT: base.usda has no pika_finger_{side}{suffix} "
+                                 f"instance block to repoint -- the importer output "
+                                 f"changed shape, not just its indentation.")
+            ind = m.group("ind")
+            new = (f'{ind}def Xform "{name}" (\n'
+                   f'{ind}    prepend references = @./tip_v15.usda@</TipV15/{side}_{part}>\n'
+                   f'{ind})')
+            txt = txt[:m.start()] + new + txt[m.end():]
             n += 1
     path.write_text(txt)
     return n
@@ -167,13 +196,28 @@ _MASS_NEW = """                                            over "finger_{side}" 
 
 
 def _patch_mass(path, mass):
+    """Same indentation caveat as _patch_base -- match the `over` by regex, not by depth."""
     txt = path.read_text()
     for side in ("left", "right"):
-        old = _MASS_OLD.format(side=side)
-        if old not in txt:
+        pat = re.compile(
+            r'^(?P<ind>[ \t]*)over "finger_' + side + r'" \(\n'
+            r'(?P=ind)    prepend apiSchemas = \["PhysicsRigidBodyAPI"\]\n'
+            r'(?P=ind)\)\n'
+            r'(?P=ind)\{\n'
+            r'(?P=ind)\}',
+            re.MULTILINE)
+        m = pat.search(txt)
+        if m is None:
             raise SystemExit(f"ABORT: physics.usda has no empty finger_{side} rigid-body "
                              f"block -- mass may already be authored; check before rebuilding.")
-        txt = txt.replace(old, _MASS_NEW.format(side=side, mass=mass), 1)
+        ind = m.group("ind")
+        new = (f'{ind}over "finger_{side}" (\n'
+               f'{ind}    prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]\n'
+               f'{ind})\n'
+               f'{ind}{{\n'
+               f'{ind}    float physics:mass = {mass:.6f}\n'
+               f'{ind}}}')
+        txt = txt[:m.start()] + new + txt[m.end():]
     path.write_text(txt)
 
 
@@ -194,5 +238,5 @@ def build_asset(parts, pla_hull, tpu_parts, mass, src_asset, out_asset,
     print(f"  payloads/tip_v15.usda: {n_col} colliders, 2 materials")
     print(f"  payloads/base.usda: repointed {n} finger children")
     print(f"  payloads/Physics/physics.usda: physics:mass = {mass:.6f} kg on both fingers")
-    print(f"  root: {out_asset.name}/rb3_730e_pika_articulated_sim.usda")
+    print(f"  root: {out_asset.name}/{src_asset.name}.usda")
     return out_asset

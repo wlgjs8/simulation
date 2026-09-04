@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="dual_rb5_850e_stand_only"><link name="world" /><link name="base" />
+  <link name="stand">
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/dual_rb5_850e_stand_ver2.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </visual>
+  </link>
+  <link name="stand_collision">
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_000.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_001.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_002.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_003.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_004.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_005.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_006.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_007.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_008.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_009.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_010.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_011.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_012.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_013.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_014.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_015.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_016.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_017.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_018.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <mesh filename="/home/plaif/workspace/robotics_lab/rb_servo_server/descriptions/meshes/stands/dual_rb5_850e/collision_ver2/stand_hull_019.stl" scale="0.001 0.001 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="stand_left_arm_base" />
+  <link name="stand_right_arm_base" />
+  <joint name="base_fixed" type="fixed">
+    <parent link="world" />
+    <child link="base" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </joint>
+  <joint name="stand_fixed" type="fixed">
+    <parent link="base" />
+    <child link="stand" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </joint>
+  <joint name="stand_collision_fixed" type="fixed">
+    <parent link="stand" />
+    <child link="stand_collision" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </joint>
+<joint name="stand_left_arm_base_fixed" type="fixed">
+    <parent link="stand" />
+    <child link="stand_left_arm_base" />
+    <origin xyz="0.17036 0.19707 0.57036" rpy="2.185913927779314 0.5231323161197823 -2.186648937497128" />
+  </joint>
+  <joint name="stand_right_arm_base_fixed" type="fixed">
+    <parent link="stand" />
+    <child link="stand_right_arm_base" />
+    <origin xyz="0.17036 -0.19707 0.57036" rpy="2.1859138555489475 -0.5231322390070723 -0.9549437348744108" />
+  </joint>
+  </robot>

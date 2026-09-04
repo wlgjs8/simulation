@@ -51,22 +51,36 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # NOTE this is stage 1 of the tip swap: geometry, colour, colliders and mass. The blade is
 # still a RIGID body; stage 2 relaxes the contact parameters for 95A compliance.
 PIKA_TIP = os.environ.get("PIKA_TIP", "v15").lower()
-ARM_USD = ROOT / ("assets/rb3_730e_pika_tip_v15/rb3_730e_pika_articulated_sim.usda"
+# 2026-09-05: RB3-730E -> RB5-850E, the arm and stand the robot now runs.
+# The RB5 display URDF already draws the printed PLA+TPU tip natively, so `v15` here means
+# the SDF blade collider and the measured 55.8 g finger mass, not a visual graft.
+SIM_ARM = os.environ.get("SIM_ARM", "rb5_850e").lower()
+ARM_USD = ROOT / (f"assets/{SIM_ARM}_pika_tip_v15/{SIM_ARM}_pika_articulated_sim.usda"
                   if PIKA_TIP == "v15" else
-                  "assets/rb3_730e_pika_articulated_sim/rb3_730e_pika_articulated_sim.usda")
+                  f"assets/{SIM_ARM}_pika_articulated_sim/{SIM_ARM}_pika_articulated_sim.usda")
 if not ARM_USD.exists():
-    raise SystemExit(f"ABORT: PIKA_TIP={PIKA_TIP} but {ARM_USD} is missing. "
-                     f"Build it with: .venv-isaac/bin/python scripts/build_tip_v15.py")
-STAND_USD = ROOT / "assets/dual_rb3_730e_stand_ver3/dual_rb3_730e_stand_ver3.usda"
+    raise SystemExit(f"ABORT: SIM_ARM={SIM_ARM} PIKA_TIP={PIKA_TIP} but {ARM_USD} is missing.\n"
+                     f"Build it with:  .venv-isaac/bin/python scripts/make_rb5_sim_urdf.py\n"
+                     f"                .venv-isaac/bin/python scripts/import_urdf.py "
+                     f"--urdf assets/urdf/{SIM_ARM}_pika_articulated_sim.urdf\n"
+                     f"                .venv-isaac/bin/python scripts/build_tip_v15.py")
+STAND_USD = ROOT / "assets/dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usda"
 
 PROMPT = (
     "pick up the black bolt with the right arm and put it in the right box, "
     "then pick up the gray bolt with the left arm and put it in the left box"
 )
 
+# InitMotion reset pose, deg. READ FROM THE SAVED FILE, not from rb_gui's code default:
+# rb_gui persists the operator's taught pose to ~/.rb_servo_gui/init_motion.json and only
+# falls back to _DEFAULT_INIT_*_JOINTS_DEG when it is absent -- and those defaults are still
+# the RB3 values, missed by the 2026-09-02 RB5 pass that rotated every other stand-frame
+# constant. Values below are the file as of 2026-09-03 20:56. FK cross-check against 594k
+# ticks of real teleop: this pose puts left TCP z at -0.054 and right at -0.072, against a
+# measured dwell median of -0.055 / -0.072.
 RESET = {
-    "left": [259.0, 75.6, 129.5, -55.6, -131.2, -161.7],
-    "right": [-253.7, -76.9, -127.6, 65.7, 143.7, 166.9],
+    "left": [-85.721, 36.301, 125.914, -9.832, -123.706, 33.556],
+    "right": [86.320, -28.371, -125.802, -1.274, 123.360, -42.350],
 }
 ARM_JOINTS = [
     "base_joint",
@@ -81,8 +95,15 @@ MOUNT_FRAME = {"left": "stand_left_arm_base", "right": "stand_right_arm_base"}
 # ---- scene (same numbers as build_scene.py) ---------------------------------
 SHAFT_R, SHAFT_L = 0.006, 0.025
 HEAD_R, HEAD_L = 0.0092, 0.012
+# See scripts/build_scene.py for the derivation of every number in this block. Short version:
+# z = 0 is the STAND origin and the table is 295 mm below it (a 280 mm riser under a stand
+# whose base plate reaches 15 mm below its own origin), and the two bolt piles sit 92 mm
+# apart, not 320. Both were measured off 594k ticks of real stand-frame TCP, 2026-09-04.
+TABLE_Z = -0.295
+RISER_H = 0.280
 TABLE = dict(cx=0.55, cy=0.0, hx=0.50, hy=0.55, thick=0.012)
-PILE_X, PILE_DY = 0.47, 0.16
+RISER = dict(cx=0.0807, cy=0.0, hx=0.2007, hy=0.2607)
+PILE_X, PILE_DY = 0.455, 0.046
 BOX_X, BOX_DY = 0.72, 0.215
 BOX = dict(hw=0.120, hd=0.190, wall_h=0.0525, t=0.020, floor_t=0.0065, sponge_h=0.030)
 ARM_OF_COLOR = {"gray": "left", "black": "right"}
@@ -394,10 +415,14 @@ PHYSICS_DT = 1.0 / 500.0    # real servo rate
 # (up to 6.841) and the command ended 635 mm from the robot.
 # rb_servo_server does the same thing in SafetyFilter::clampJointLimits (safety_filter.cpp:251):
 #   out[i] = std::clamp(out[i], q_min_deg[i], q_max_deg[i])
-JOINT_LO = np.array([-6.2832, -6.2832, -2.618, -6.2832, -6.2832, -6.2832])
+# RB5-850E: elbow +-165 deg (2.879793 rad), the catalog bound robotics_lab's URDF generator
+# enforces and `safety.q_max_deg[2]` mirrors. RB3 was +-150.
+JOINT_LO = np.array([-6.28319, -6.28319, -2.879793, -6.28319, -6.28319, -6.28319])
 JOINT_HI = -JOINT_LO
 # stack_real.yaml dq_max_deg_s [170,170,170,240,240,320] -> rad/s, per joint
-JOINT_VEL_LIMIT = np.deg2rad([170.0, 170.0, 170.0, 240.0, 240.0, 320.0])
+# stack_real.yaml safety.dq_max_deg_s. The RB5 profile flattened the wrist: it was
+# [170,170,170,240,240,320] on RB3 and is [170]*6 now.
+JOINT_VEL_LIMIT = np.deg2rad([170.0] * 6)
 DQ_MAX = JOINT_VEL_LIMIT * PHYSICS_DT
 # DLS damping. 1e-4 is the historical value every published number used. Near the boxes the
 # Jacobian's smallest singular value drops to ~2e-4 and the arm visibly shakes and sheds bolts;
@@ -546,16 +571,34 @@ def quat_to_mat(q):
 # class does), and an analytic Jacobian is both exact and far cheaper at 500 Hz.
 # Each entry is (origin_xyz, origin_rpy, axis); the joint rotation applies AFTER
 # the origin transform. Verified at runtime against the physics TCP pose.
+# RB5-850E, straight out of rb5_850e_pika_articulated.urdf. This is NOT an RB3 chain with
+# new lengths -- the wrist convention differs: J4/J5/J6 axes go Z/Y/Z -> Y/Z/Y and the
+# flange normal in link6 moves from +Z to -Y. Any attempt to port the RB3 chain by editing
+# offsets produces an arm that looks right at zero and is wrong everywhere else.
 URDF_CHAIN = [
-    ((0.0, 0.0, 0.0), (0.0, 0.0, 1.5708), None),            # link0_fixed
-    ((0.0, 0.0, 0.1453), (0.0, 0.0, -1.5708), (0, 0, 1)),   # base_joint
+    ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), None),               # link0_fixed
+    ((0.0, 0.0, 0.1692), (0.0, 0.0, 0.0), (0, 0, 1)),       # base_joint
     ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0, 1, 0)),          # shoulder_joint
-    ((0.0, -0.00645, 0.286), (0.0, 0.0, 0.0), (0, 1, 0)),   # elbow_joint
-    ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0, 0, 1)),          # wrist1_joint
-    ((0.0, 0.0, 0.344), (0.0, 0.0, 0.0), (0, 1, 0)),        # wrist2_joint
-    ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0, 0, 1)),          # wrist3_joint
+    ((0.0, 0.0, 0.425), (0.0, 0.0, 0.0), (0, 1, 0)),        # elbow_joint
+    ((0.0, 0.0, 0.392), (0.0, 0.0, 0.0), (0, 1, 0)),        # wrist1_joint
+    ((0.0, -0.1107, 0.1107), (0.0, 0.0, 0.0), (0, 0, 1)),   # wrist2_joint
+    ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0, 1, 0)),          # wrist3_joint
 ]
-TOOL_Z = 0.1 + 0.247642   # attachment_site + tcp
+# link6 -> tcp. On RB3 this was a pure +z translation (0.100 + 0.247642) and the code below
+# could add it as a scalar. On RB5 `attachment_site` is at link6 + (0, -0.0967, 0) with
+# rpy (1.57, 0, 0) -- the flange faces -Y -- so the tool transform carries a ROTATION and
+# has to be a full matrix. The Pika length itself is unchanged: attachment_site -> tcp is
+# 0.247642 on both arms.
+def _tool_xf():
+    T = np.eye(4)
+    T[:3, :3] = _rpy(1.57, 0.0, 0.0)
+    T[:3, 3] = (0.0, -0.0967, 0.0)
+    Tt = np.eye(4)
+    Tt[2, 3] = 0.247642
+    return T @ Tt
+
+
+TOOL_XF = None      # built after _rpy is defined, below
 
 
 def _rpy(r, p, y):
@@ -566,6 +609,9 @@ def _rpy(r, p, y):
         [sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr],
         [-sp, cp * sr, cp * cr],
     ])
+
+
+TOOL_XF = _tool_xf()
 
 
 def _axis_rot(axis, q):
@@ -589,9 +635,7 @@ def fk_chain(q, T_mount):
             R[:3, :3] = _axis_rot(ax, q[qi])
             T = T @ R
             qi += 1
-    Tt = np.eye(4)
-    Tt[2, 3] = TOOL_Z
-    T = T @ Tt
+    T = T @ TOOL_XF
     return T[:3, 3].copy(), T[:3, :3].copy(), origins, axes
 
 
@@ -1061,6 +1105,7 @@ def main() -> int:
 
     MAT = {
         "table": mat("/World/m/table", (0.42, 0.44, 0.45), 0.42, 0.65),
+        "riser": mat("/World/m/riser", (0.05, 0.05, 0.055), 0.55, 0.35),
         "green": mat("/World/m/green", (0.10, 0.38, 0.27), 0.45),
         "boxgray": mat("/World/m/boxgray", (0.46, 0.47, 0.49), 0.50, 0.35),
         "insert": mat("/World/m/insert", (0.26, 0.26, 0.28), 0.85),
@@ -1115,23 +1160,28 @@ def main() -> int:
             _die("ABORT: GRIP_MAXF set but no finger joints found -- the limit would "
                  "have been silently ignored and the run would look like a physics result.")
 
-    sbox("/World/scene/table", (TABLE["cx"], TABLE["cy"], -TABLE["thick"]),
+    sbox("/World/scene/table", (TABLE["cx"], TABLE["cy"], TABLE_Z - TABLE["thick"]),
          (TABLE["hx"], TABLE["hy"], TABLE["thick"]), "table")
+    # The riser the stand is bolted to. Black, stand footprint (operator, 2026-09-05). It
+    # spans table top -> stand base plate, so the arms cannot swing through the one large
+    # object that is now directly under them.
+    sbox("/World/scene/riser", (RISER["cx"], RISER["cy"], TABLE_Z + RISER_H / 2),
+         (RISER["hx"], RISER["hy"], RISER_H / 2), "riser")
     b = BOX
     for name, color, wall in (("box_gray", "gray", "boxgray"), ("box_green", "black", "green")):
         cy = BOX_CY[color]
         r = f"/World/scene/{name}"
         UsdGeom.Xform.Define(stage, r)
-        sbox(f"{r}/floor", (BOX_X, cy, b["floor_t"] / 2),
+        sbox(f"{r}/floor", (BOX_X, cy, TABLE_Z + b["floor_t"] / 2),
              (b["hw"], b["hd"], b["floor_t"] / 2), wall)
-        sbox(f"{r}/sponge", (BOX_X, cy, b["floor_t"] + b["sponge_h"] / 2),
+        sbox(f"{r}/sponge", (BOX_X, cy, TABLE_Z + b["floor_t"] + b["sponge_h"] / 2),
              (b["hw"] - b["t"], b["hd"] - b["t"], b["sponge_h"] / 2), "insert")
         h = b["wall_h"]
         for tag, off, half in (("xm", (-b["hw"], 0), (b["t"], b["hd"], h)),
                                ("xp", (+b["hw"], 0), (b["t"], b["hd"], h)),
                                ("ym", (0, -b["hd"]), (b["hw"], b["t"], h)),
                                ("yp", (0, +b["hd"]), (b["hw"], b["t"], h))):
-            sbox(f"{r}/w_{tag}", (BOX_X + off[0], cy + off[1], h), half, wall)
+            sbox(f"{r}/w_{tag}", (BOX_X + off[0], cy + off[1], TABLE_Z + h), half, wall)
 
     # Optional explicit contact material for the bolts (see the binding below).
     _PHYSMAT = None
@@ -1862,7 +1912,7 @@ def main() -> int:
         for (color, x, y, yaw), path in zip(poses, bolt_prims):
             v = bolt_views[path]
             qz = np.array([math.cos(yaw / 2), 0.0, 0.0, math.sin(yaw / 2)])
-            v.set_world_poses(np.array([[x, y, SHAFT_R + 0.002]]), np.array([qz]))
+            v.set_world_poses(np.array([[x, y, TABLE_Z + SHAFT_R + 0.002]]), np.array([qz]))
             v.set_velocities(np.zeros((1, 6)))
         for i, path in enumerate(bolt_prims):
             UsdShade.MaterialBindingAPI(stage.GetPrimAtPath(path + "/shaft")).Bind(
@@ -2004,7 +2054,7 @@ def main() -> int:
         # carry", and the two rank the arms differently (up to 5 places apart on the current
         # board). Track the lift directly off bolt height so the pick stage can be read alone;
         # a bolt above LIFT_Z was carried, whatever the close-event detector thought.
-        LIFT_Z = 0.060
+        LIFT_Z = TABLE_Z + 0.060      # 60 mm ABOVE THE TABLE, wherever the table is
         bolt_max_z = np.zeros(len(bolt_prims))
         smin_log = []
         held_last = {}   # bolt path -> most recent (arm, grasp tick)
@@ -2396,7 +2446,7 @@ def main() -> int:
                               # above where the command wanted it (fingers resting on a
                               # neighbour or the pile). Either way the jaws close higher than
                               # intended, and dz alone cannot tell WHY.
-                              bolt_elev_mm=float((bp[2] - 0.0091) * 1e3),
+                              bolt_elev_mm=float((bp[2] - (TABLE_Z + 0.0091)) * 1e3),
                               z_cmd_gap_mm=float((p_t[2] - fk_chain(
                                   q_cmd[side], T_mount[side])[0][2]) * 1e3),
                               neighbors_in_jaw=int(sum(

@@ -129,8 +129,12 @@ TOOL = (pathlib.Path.home() / "workspace/robotics_lab/rb_servo_server/descriptio
         / "robots/rb5_850e/visual/tool")
 
 OUT_MESH = ROOT / "assets/meshes/tip_v15"
-SRC_ASSET = ROOT / "assets/rb3_730e_pika_articulated_sim"
-OUT_ASSET = ROOT / "assets/rb3_730e_pika_tip_v15"
+# ARM is a knob since the 2026-09-05 RB3 -> RB5 port: the tip is the SAME PART on both arms
+# (robotics_lab keeps one copy, under the rb5 tool directory, and both arm URDFs point at
+# it), so only the asset this tip is grafted onto changes.
+ARM = os.environ.get("SIM_ARM", "rb5_850e").lower()
+SRC_ASSET = ROOT / f"assets/{ARM}_pika_articulated_sim"
+OUT_ASSET = ROOT / f"assets/{ARM}_pika_tip_v15"
 
 # What robotics_lab's generator puts in the tool frame, in mm. Gate targets, not inputs --
 # if a rebuild there moves them, this build says so instead of quietly following.

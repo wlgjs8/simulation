@@ -26,17 +26,28 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # importer silently drops it (the tool link becomes a PhysX body whose pose comes
 # from tool_joint, rpy=0). Baking it into the mesh is the only route that survives.
 # See CLAUDE.md; regenerate with scripts/bake_tool_mesh.py --deg 90.
-ARM_USD = ROOT / "assets/rb3_730e_pika_articulated_sim/rb3_730e_pika_articulated_sim.usda"
-STAND_USD = ROOT / "assets/dual_rb3_730e_stand_ver3/dual_rb3_730e_stand_ver3.usda"
-CELL_USD = ROOT / "assets/cell_dual_rb3_730e.usd"
+# 2026-09-05, RB3-730E -> RB5-850E. The tool-visual note above is RB3-only history: every
+# RB5 URDF writes the tool visual at identity and the exported meshes already carry the
+# rotation, so nothing is baked here any more.
+ARM_USD = ROOT / "assets/rb5_850e_pika_tip_v15/rb5_850e_pika_articulated_sim.usda"
+STAND_USD = ROOT / "assets/dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usda"
+CELL_USD = ROOT / "assets/cell_dual_rb5_850e.usd"
 OUT_JSON = ROOT / "outputs/cell_reset_pose.json"
 OUT_PNG = ROOT / "outputs/cell_overview.png"
 VIEW = "overview"
 
-# InitMotion reset pose, rb_gui/rb_servo_gui/app.py:216-217 (deg)
+# InitMotion reset pose (deg). SOURCE IS THE SAVED FILE, NOT THE CODE DEFAULT:
+# rb_gui writes the operator's taught pose to `~/.rb_servo_gui/init_motion.json`
+# (app.py `_init_motion_path`, override `RB_GUI_INIT_MOTION_PATH`) and only falls back to
+# `_DEFAULT_INIT_*_JOINTS_DEG` when that file is absent. Those defaults are STILL the RB3
+# values -- the 2026-09-02 RB5 pass that rotated every other stand-frame constant missed
+# them -- so reading the code would have put an RB3 pose on an RB5 arm.
+# Values below: the file as saved 2026-09-03 20:56, i.e. the pose the robot actually uses.
+# Cross-checked by FK against four teleop sessions the next day: this pose puts the left TCP
+# at z -0.054 and the right at -0.072, against a measured dwell median of -0.055 / -0.072.
 RESET = {
-    "left": [259.0, 75.6, 129.5, -55.6, -131.2, -161.7],
-    "right": [-253.7, -76.9, -127.6, 65.7, 143.7, 166.9],
+    "left": [-85.721, 36.301, 125.914, -9.832, -123.706, 33.556],
+    "right": [86.320, -28.371, -125.802, -1.274, 123.360, -42.350],
 }
 JOINTS = [
     "base_joint",
@@ -170,7 +181,7 @@ def main() -> int:
                 deg += args.wrist3_offset_deg
             q[names.index(j)] = np.deg2rad(deg)
         # jaw: finger_pos = (1 - grip/100) * 0.047, meshes authored OPEN (see CLAUDE.md)
-        fp = (1.0 - args.grip / 100.0) * 0.047
+        fp = (1.0 - args.grip / 100.0) * 0.049   # v15 jaw, stack_real gripper_finger_travel_m
         for jn, sgn in (("finger_left_joint", +1.0), ("finger_right_joint", -1.0)):
             if jn in names:
                 q[names.index(jn)] = sgn * fp

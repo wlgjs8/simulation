@@ -1284,3 +1284,137 @@ close의 dz는 **볼트 높이(진짜 파지 시도)와 허공(이송 중·박�
 - `t1_report.py`에 볼트높이 close 비율 추가, `dz_p50` 강등.
 - `anchAB` × `PIKA_TIP=orig` 대조군 (위 교락 분리용).
 - §21의 미판정 항목(정책 청크 회전 요구량 실기 대비 3배)은 이 런들로도 아직 안 풀렸다.
+
+## 25. RB3-730E -> RB5-850E 이식 (2026-09-05)
+
+실기가 2026-09-02에 RB5-850E + 새 스탠드로 바뀌었고, 리그는 RB3로 남아 있었다. 그리퍼(v15
+PLA+TPU 팁)와 과제는 그대로다 — `boltv2`가 바로 그 팁으로 재수집한 캠페인이다.
+
+### 결론부터: 좌표계는 안 바꿔도 된다
+
+**RB5 world 프레임 = 이 리그가 이미 쓰던 프레임.** RB3 스탠드는 base→stand가 +90°였고 이
+리그는 stand 프레임(=+x 작업영역)에서 셀을 지었는데, RB5는 base→stand가 항등이라 그 stand
+프레임이 곧 world가 됐다. 증거 둘: robotics_lab `7a7f9a9`가 GUI의 stand-frame 상수를 전부
+Rz(+90) 돌린 결과가 `(0.1725, ±0.1601, 0.78)`로 이 리그의 마운트 규약과 같고,
+`stack_real.yaml`의 ROI 주석이 같은 이유를 명시한다. 씬을 회전시키지 말 것.
+
+### RB5는 RB3의 확대판이 아니다
+
+| | RB3 | RB5 |
+|---|---|---|
+| J4/J5/J6 축 | Z / Y / Z | **Y / Z / Y** |
+| link6 플랜지 법선 | +Z | **−Y** |
+| link0→link1 | 0.1453 | 0.1692 |
+| 어깨→팔꿈치 | y −0.00645, z 0.286 | z **0.425** |
+| 팔꿈치→wrist1 | 0 | z **0.392** |
+| wrist1→wrist2 | z 0.344 | y **−0.1107**, z **0.1107** |
+| link6→attachment_site | z 0.100, rpy 0 | **y −0.0967, rpy (1.57,0,0)** |
+| attachment_site→tcp | 0.247642 | 0.247642 (동일) |
+| 팔꿈치 한계 | ±150° | **±165°** |
+| `dq_max_deg_s` | [170,170,170,240,240,320] | **[170]×6** |
+
+축 규약이 다르므로 **RB3 체인을 길이만 고쳐 옮기는 것은 불가능**하고, RB3 리셋 자세도 부호·
+오프셋 변환으로 옮길 수 없다. `TOOL_Z` 스칼라는 회전을 담은 `TOOL_XF` 행렬로 교체했다.
+
+### 임포트 함정 넷 (전부 조용히 죽는 종류)
+
+1. **`elbow_joint`에 `effort="0.0"`** — RB5 URDF 셋 전부. robotics_lab은 Pinocchio라 무해하지만
+   Isaac은 읽고 J3에 토크 0을 준다. 팔이 스스로 접힌다. 형제 관절과 같은 20000.0으로 덮어썼다.
+2. **`link0`에 inertial 없음** — 명시 부여.
+3. **`tcp`/`attachment_site`/`ft_sensor_*`가 빈 링크** — 임포터가 강체가 아닌 Xform으로 만들어
+   `RigidBodyAPI`로 찾는 모든 소비자가 빈손이 된다(첫 RB5 빌드가 빈 `cell_reset_pose.json`을
+   썼다). RB3는 마커 구가 있어 **우연히** 강체였고, 대신 §10의 negative-mass 경고를 달고 살았다.
+   유효한 미소 관성(1e-4 kg)을 주면 둘 다 해결된다.
+4. **툴/핑거에 collision 없음** — 그리퍼가 물리적으로 투명. rb5 hull 3종 부착.
+
+부수 함정: 단위가 섞여 있다(링크 `.dae`는 미터, 스탠드와 Pika STL은 밀리미터). dual URDF에는
+팔 visual이 없다(충돌 헐만). dual URDF의 `tcp`는 플랜지이고 단팔 URDF의 `tcp`는 Pika 팁이다.
+
+### 리셋 자세는 코드가 아니라 파일에 있다
+
+`~/.rb_servo_gui/init_motion.json` (`RB_GUI_INIT_MOTION_PATH`로 override). rb_gui는 운영자가
+가르친 자세를 여기 저장하고, **파일이 없을 때만** `_DEFAULT_INIT_*_JOINTS_DEG`로 폴백한다.
+그 폴백 상수는 아직 RB3 값이다 — 2026-09-02 RB5 패스가 다른 stand-frame 상수는 다 돌리면서
+이 두 줄만 놓쳤다(`7a7f9a9` diff에 없음). **코드를 읽었으면 RB5 팔에 RB3 자세를 넣었을 것.**
+
+```
+left  : -85.721,  36.301,  125.914,  -9.832, -123.706,  33.556
+right :  86.320, -28.371, -125.802,  -1.274,  123.360, -42.350
+```
+
+### 테이블은 z=0이 아니다 — 295 mm 아래다
+
+RB3 셀은 "테이블 상면 = 스탠드 베이스 평면"으로 가정했다(§12). 몽타주에서 물려받은 가정이고
+측정된 적이 없다. RB5에서는 **운영자가 테이블과 스탠드 사이에 280 mm 직육면체 라이저를
+조립**했으므로 거짓이다. 스탠드 베이스 플레이트가 자기 원점보다 15 mm 아래까지 내려오므로
+
+```
+TABLE_Z = -0.015 - 0.280 = -0.295
+```
+
+**독립 확인**: 2026-09-04 텔레옵 4세션, `{left,right}_tcp_actual_stand_*` 59.4만 틱에서 더미
+영역(x<0.60)의 TCP 최저가 p1 −0.283(좌) / −0.291(우). 12 mm 볼트를 사이에 두고 핑거팁이
+테이블 몇 mm 위에서 멈추는 값이라 정합한다. 옛 z=0은 씬 전체를 **295 mm 띄워 놓고 있었다.**
+
+라이저는 실제 충돌체로 넣었다(검정, 스탠드 풋프린트 x∈[−0.120,0.2815] y ±0.2607를 STL에서
+실측). 팔이 이제 스탠드보다 280 mm 아래로 내려가므로 빼놓으면 그 자리를 통과해 버린다.
+
+### 더미가 실제로는 붙어 있다
+
+같은 텔레옵 추출에서 깊은 지점(z<−0.24 = 실제 파지)의 군집:
+좌(회색) x 0.458 / y **+0.051**, 우(검정) x 0.452 / y **−0.041**. 즉 **두 더미가 92 mm 간격**인데
+이 리그는 320 mm로 벌려 놨었다. 좌표 정정이 아니라 **난이도 변경**이다 — nearest-bolt 모호성이
+올라가므로 이식 전후는 raw grasp 수가 아니라 **margin 버킷**으로 비교할 것.
+박스는 그대로 뒀다: 릴리스 지점 x 0.762/0.767, y +0.253/−0.310이 현재 배치의 380×240 박스
+안에 들어온다(릴리스가 박스 중심이 아닐 뿐).
+
+### 검증
+
+| 게이트 | 결과 |
+|---|---|
+| 해석 FK vs Isaac 셀 (리셋 자세) | **0.033 / 0.052 mm** |
+| 해석 FK vs PhysX TCP (런타임) | **0.016 / 0.019 mm** |
+| FK vs 실기 TCP 체류 중앙값 | 좌 −0.054 vs −0.055, 우 −0.072 vs −0.072 |
+| 마운트 월드 좌표 | (0.1704, ±0.1971, 0.5704), URDF 파싱값과 일치 |
+
+세 번째 줄이 핵심이다: robotics_lab URDF → 해석 FK → Isaac 물리 → **실기 로그**가 한 점에서 만난다.
+
+### 재빌드 절차
+
+```bash
+.venv/bin/python scripts/make_rb5_sim_urdf.py            # display urdf -> sim urdf
+.venv/bin/python scripts/make_rb5_stand_urdf.py          # dual urdf -> stand only
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/import_urdf.py \
+    --urdf assets/urdf/rb5_850e_pika_articulated_sim.urdf
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/import_urdf.py \
+    --urdf assets/urdf/dual_rb5_850e_stand_only.urdf
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/build_tip_v15.py   # SIM_ARM=rb5_850e
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/build_cell.py
+```
+
+`SIM_ARM` (기본 `rb5_850e`)로 팔을 고른다. `build_tip_v15_asset.py`의 USD 패치는 이제 들여쓰기
+비의존이고, v15 visual이 이미 네이티브인지 감지한다 — RB5 display URDF는
+`pika_finger_{side}_{pla,tpu}`를 직접 참조하므로 콜라이더와 질량만 갈아끼운다.
+
+### ⚠️ 동결 씬을 새로 떠야 한다
+
+`assets/scene_states40_aligned.json`은 볼트 pose를 **월드 좌표**로 담고 있고 z≈0.0091, 즉 옛
+테이블 높이다. 그대로 쓰면 볼트가 304 mm 낙하한다. RB5용을 새로 떴다:
+`assets/scene_states40_aligned_rb5.json` (볼트 z p50 **−0.2859**, x p50 0.454, |y| p50 0.075).
+**이전 std20 수치와는 비교 불가**다 — 하드웨어와 씬이 둘 다 바뀌었으므로 당연하다.
+
+### 첫 신호 (12초 스모크, :8001 `boltv2_plain_40k`)
+
+close 시 조준오차 `dxy` p50 **30.5 mm** (RB3 기준선은 67.5 mm), `dz` p50 −6.6 mm로 close가
+볼트 높이에서 일어난다. n=4 close라 확정이 아니다 — std20으로 재실행할 것.
+
+### 남은 것
+
+- `scripts/build_scene.py`의 프리뷰 경로에 `TABLE_Z`/`RISER`를 아직 안 먹였다(평가 경로인
+  `eval_closed_loop.py`에는 반영). 프리뷰가 옛 높이로 그려진다.
+- 손목 카메라 `LENS`는 tool 프레임 오프셋이라 팔 교체와 무관하지만, robotics_lab에
+  `calibration/T_tcp_cam.npy`가 생겼다(TCP 프레임 8.86/49.83/−132.95 mm; 이 리그의 CAD 공칭을
+  같은 프레임으로 환산하면 9.17/46.01/−128.34, 차이 ~6 mm). 다만 `active_calibration.yaml`은
+  여전히 `hand_eye_status: unmeasured`이고 그 npy를 읽는 곳은 포인트클라우드 뷰어뿐이라,
+  정식 캘리브인지 확인 후 채택할 것.
+- 리셋 자세 폴백 상수(rb_gui `app.py:229-230`)가 RB3인 건 robotics_lab 쪽 숙제다.

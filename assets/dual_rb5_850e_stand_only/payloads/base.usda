@@ -1,0 +1,314 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.3"
+    }
+    defaultPrim = "dual_rb5_850e_stand_only"
+    doc = """Generated from Composed Stage of root layer /tmp/tmp1s08jhha/dual_rb5_850e_stand_only.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_dual_rb5_850e_stand_only_uuociumh/usdex_dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_dual_rb5_850e_stand_only_uuociumh/temp_dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    subLayers = [
+        @./robot.usda@
+    ]
+    upAxis = "Z"
+)
+
+def Xform "dual_rb5_850e_stand_only" (
+    prepend apiSchemas = ["GeomModelAPI"]
+    assetInfo = {
+        string name = "dual_rb5_850e_stand_only"
+    }
+    kind = "component"
+)
+{
+    float3[] extentsHint = [(-0.120000005, -0.26071072, -0.015000001), (0.28149498, 0.26071072, 0.68149495), (3.4028235e38, 3.4028235e38, 3.4028235e38), (-3.4028235e38, -3.4028235e38, -3.4028235e38), (3.4028235e38, 3.4028235e38, 3.4028235e38), (-3.4028235e38, -3.4028235e38, -3.4028235e38), (-0.12383072, -0.2627942, -0.018828535), (0.2834987, 0.2628022, 0.68250906)]
+
+    def Scope "Geometry"
+    {
+        def Xform "world"
+        {
+            def Xform "base"
+            {
+                quatf xformOp:orient = (1, 0, 0, 0)
+                float3 xformOp:scale = (1, 1, 1)
+                double3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                def Xform "stand"
+                {
+                    quatf xformOp:orient = (1, 0, 0, 0)
+                    float3 xformOp:scale = (1, 1, 1)
+                    double3 xformOp:translate = (0, 0, 0)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                    def Xform "dual_rb5_850e_stand_ver2" (
+                        instanceable = true
+                        prepend references = @./instances.usda@</Instances/dual_rb5_850e_stand_ver2>
+                    )
+                    {
+                        quatd xformOp:orient = (1, 0, 0, 0)
+                        double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                        double3 xformOp:translate = (0, 0, 0)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+
+                    def Xform "stand_collision"
+                    {
+                        quatf xformOp:orient = (1, 0, 0, 0)
+                        float3 xformOp:scale = (1, 1, 1)
+                        double3 xformOp:translate = (0, 0, 0)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+                        def Xform "stand_hull_000" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_000>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_001" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_001>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_002" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_002>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_003" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_003>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_004" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_004>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_005" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_005>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_006" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_006>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_007" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_007>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_008" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_008>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_009" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_009>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_010" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_010>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_011" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_011>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_012" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_012>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_013" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_013>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_014" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_014>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_015" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_015>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_016" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_016>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_017" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_017>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_018" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_018>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+
+                        def Xform "stand_hull_019" (
+                            instanceable = true
+                            prepend references = @./instances.usda@</Instances/stand_hull_019>
+                        )
+                        {
+                            quatd xformOp:orient = (1, 0, 0, 0)
+                            double3 xformOp:scale = (0.001000000047, 0.001000000047, 0.001000000047)
+                            double3 xformOp:translate = (0, 0, 0)
+                            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                        }
+                    }
+
+                    def Xform "stand_left_arm_base"
+                    {
+                        quatf xformOp:orient = (-0.00018770919, -0.49980077, 0.70720464, 0.50006074)
+                        float3 xformOp:scale = (1, 1, 1)
+                        double3 xformOp:translate = (0.17036, 0.19707, 0.57036)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+
+                    def Xform "stand_right_arm_base"
+                    {
+                        quatf xformOp:orient = (0.50006074, 0.70720464, -0.49980077, -0.0001877634)
+                        float3 xformOp:scale = (1, 1, 1)
+                        double3 xformOp:translate = (0.17036, -0.19707, 0.57036)
+                        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                    }
+                }
+            }
+        }
+    }
+
+    def Scope "Physics"
+    {
+    }
+}
+

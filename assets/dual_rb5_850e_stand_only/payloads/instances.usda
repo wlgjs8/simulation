@@ -1,0 +1,290 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.3"
+    }
+    doc = """Generated from Composed Stage of root layer /tmp/tmp1s08jhha/dual_rb5_850e_stand_only.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_dual_rb5_850e_stand_only_uuociumh/usdex_dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_dual_rb5_850e_stand_only_uuociumh/temp_dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Scope "Instances"
+{
+    def Xform "dual_rb5_850e_stand_ver2" (
+        prepend references = @./geometries.usd@</Geometries/dual_rb5_850e_stand_ver2>
+    )
+    {
+        over "dual_rb5_850e_stand_ver2"
+        {
+        }
+    }
+
+    def Xform "stand_hull_000" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_000>
+    )
+    {
+        over "stand_hull_000" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_001" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_001>
+    )
+    {
+        over "stand_hull_001" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_002" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_002>
+    )
+    {
+        over "stand_hull_002" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_003" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_003>
+    )
+    {
+        over "stand_hull_003" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_004" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_004>
+    )
+    {
+        over "stand_hull_004" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_005" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_005>
+    )
+    {
+        over "stand_hull_005" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_006" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_006>
+    )
+    {
+        over "stand_hull_006" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_007" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_007>
+    )
+    {
+        over "stand_hull_007" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_008" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_008>
+    )
+    {
+        over "stand_hull_008" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_009" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_009>
+    )
+    {
+        over "stand_hull_009" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_010" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_010>
+    )
+    {
+        over "stand_hull_010" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_011" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_011>
+    )
+    {
+        over "stand_hull_011" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_012" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_012>
+    )
+    {
+        over "stand_hull_012" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_013" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_013>
+    )
+    {
+        over "stand_hull_013" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_014" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_014>
+    )
+    {
+        over "stand_hull_014" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_015" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_015>
+    )
+    {
+        over "stand_hull_015" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_016" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_016>
+    )
+    {
+        over "stand_hull_016" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_017" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_017>
+    )
+    {
+        over "stand_hull_017" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_018" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_018>
+    )
+    {
+        over "stand_hull_018" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+
+    def Xform "stand_hull_019" (
+        prepend references = @./geometries.usd@</Geometries/stand_hull_019>
+    )
+    {
+        over "stand_hull_019" (
+            apiSchemas = ["PhysicsCollisionAPI", "NewtonCollisionAPI", "PhysicsMeshCollisionAPI", "NewtonMeshCollisionAPI"]
+        )
+        {
+            token physics:approximation = "convexHull"
+            token purpose = "guide"
+        }
+    }
+}
+
