@@ -1,0 +1,518 @@
+{
+  "runs": {
+    "8001": {
+      "policy_seconds": 30.002000000000002,
+      "fault": "",
+      "bias_left": 2.0,
+      "bias_right": 6.0,
+      "contact_rows": 0,
+      "arms": {
+        "left": {
+          "min_tcp_z_mm": -134.15592234484964,
+          "min_tcp_time_s": 30.0,
+          "max_actual_lead_mm": 2.336729872982481,
+          "gripper_command_range_pct": [
+            30.200607299804688,
+            99.81584167480469
+          ],
+          "first_policy_close_le_1pct": null
+        },
+        "right": {
+          "min_tcp_z_mm": -219.53695954149822,
+          "min_tcp_time_s": 24.634,
+          "max_actual_lead_mm": 3.052142768795359,
+          "gripper_command_range_pct": [
+            0.0,
+            99.79489135742188
+          ],
+          "first_policy_close_le_1pct": {
+            "time_s": 2.342,
+            "tcp_xyz_mm": [
+              535.9917110727756,
+              -157.8999525126677,
+              -206.69093086433944
+            ],
+            "command_pct": 0.0,
+            "actual_pct": 1.0587215423583984
+          }
+        }
+      },
+      "contact_pairs": {}
+    },
+    "8002": {
+      "policy_seconds": 30.002000000000002,
+      "fault": "",
+      "bias_left": 2.0,
+      "bias_right": 6.0,
+      "contact_rows": 646,
+      "arms": {
+        "left": {
+          "min_tcp_z_mm": -146.3080076731864,
+          "min_tcp_time_s": 18.168,
+          "max_actual_lead_mm": 3.4946760991154338,
+          "gripper_command_range_pct": [
+            19.917171478271484,
+            99.81584167480469
+          ],
+          "first_policy_close_le_1pct": null
+        },
+        "right": {
+          "min_tcp_z_mm": -259.5656620473833,
+          "min_tcp_time_s": 25.168,
+          "max_actual_lead_mm": 4.784724827581738,
+          "gripper_command_range_pct": [
+            0.0,
+            99.79489135742188
+          ],
+          "first_policy_close_le_1pct": {
+            "time_s": 2.204,
+            "tcp_xyz_mm": [
+              534.2729872992008,
+              -165.32221679551196,
+              -191.9222191078819
+            ],
+            "command_pct": 0.0,
+            "actual_pct": 4.7326860427856445
+          }
+        }
+      },
+      "contact_pairs": {
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_18/head": {
+          "first_s": 25.048000000000002,
+          "last_s": 27.396,
+          "peak_force_n": 27.264423557447834
+        },
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_right/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_18/head": {
+          "first_s": 25.054,
+          "last_s": 25.264,
+          "peak_force_n": 5.008920470275664
+        }
+      }
+    },
+    "8003": {
+      "policy_seconds": 30.002000000000002,
+      "fault": "",
+      "bias_left": 2.0,
+      "bias_right": 6.0,
+      "contact_rows": 574,
+      "arms": {
+        "left": {
+          "min_tcp_z_mm": -185.6846491384013,
+          "min_tcp_time_s": 30.0,
+          "max_actual_lead_mm": 2.9055398361015077,
+          "gripper_command_range_pct": [
+            28.282855987548828,
+            99.81584167480469
+          ],
+          "first_policy_close_le_1pct": null
+        },
+        "right": {
+          "min_tcp_z_mm": -268.216903370479,
+          "min_tcp_time_s": 7.334000000000001,
+          "max_actual_lead_mm": 11.646239303262542,
+          "gripper_command_range_pct": [
+            0.0,
+            99.79489135742188
+          ],
+          "first_policy_close_le_1pct": {
+            "time_s": 3.014,
+            "tcp_xyz_mm": [
+              522.2394534221462,
+              -152.38100430575338,
+              -254.71916266731108
+            ],
+            "command_pct": 0.0,
+            "actual_pct": 0.9149551391601562
+          }
+        }
+      },
+      "contact_pairs": {
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_18/head": {
+          "first_s": 5.200000000000001,
+          "last_s": 7.030000000000001,
+          "peak_force_n": 2.0944411709647275
+        },
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_12/head": {
+          "first_s": 12.314000000000002,
+          "last_s": 12.342,
+          "peak_force_n": 3.27892586386112
+        },
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_right/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_12/head": {
+          "first_s": 12.314000000000002,
+          "last_s": 13.048000000000002,
+          "peak_force_n": 2.61684075090782
+        },
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_right/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_12/shaft": {
+          "first_s": 13.886000000000001,
+          "last_s": 14.068000000000001,
+          "peak_force_n": 5.47703516359992
+        },
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_12/shaft": {
+          "first_s": 13.886000000000001,
+          "last_s": 14.068000000000001,
+          "peak_force_n": 4.086052957465608
+        },
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_15/head": {
+          "first_s": 16.494,
+          "last_s": 16.864,
+          "peak_force_n": 36.704789310889204
+        }
+      }
+    },
+    "8001_bias0": {
+      "policy_seconds": 30.002000000000002,
+      "fault": "",
+      "bias_left": 0.0,
+      "bias_right": 0.0,
+      "contact_rows": 6206,
+      "arms": {
+        "left": {
+          "min_tcp_z_mm": -277.1766211897514,
+          "min_tcp_time_s": 11.968000000000002,
+          "max_actual_lead_mm": 15.198637820184267,
+          "gripper_command_range_pct": [
+            8.359443664550781,
+            99.81584167480469
+          ],
+          "first_policy_close_le_1pct": null
+        },
+        "right": {
+          "min_tcp_z_mm": -276.49730281016025,
+          "min_tcp_time_s": 3.0000000000000004,
+          "max_actual_lead_mm": 4.093637883905906,
+          "gripper_command_range_pct": [
+            3.845947265625,
+            99.79489135742188
+          ],
+          "first_policy_close_le_1pct": null
+        }
+      },
+      "contact_pairs": {
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/pick_pad": {
+          "first_s": 2.9600000000000004,
+          "last_s": 3.094,
+          "peak_force_n": 240.58145350731039
+        },
+        "/World/cell/left_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_04/head": {
+          "first_s": 11.698,
+          "last_s": 15.582000000000003,
+          "peak_force_n": 2.652139747198983
+        },
+        "/World/cell/left_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_right/tip_v15_col/finger_tpu_sdf | /World/scene/pick_pad": {
+          "first_s": 11.874,
+          "last_s": 12.056000000000001,
+          "peak_force_n": 23.383163067988146
+        },
+        "/World/cell/left_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/pick_pad": {
+          "first_s": 11.894000000000002,
+          "last_s": 12.072000000000001,
+          "peak_force_n": 40.94289851784026
+        },
+        "/World/cell/left_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_right/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_04/head": {
+          "first_s": 11.940000000000001,
+          "last_s": 15.584000000000001,
+          "peak_force_n": 1.612168831564931
+        },
+        "/World/cell/left_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_right/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_04/shaft": {
+          "first_s": 11.950000000000001,
+          "last_s": 15.574,
+          "peak_force_n": 5.581903450702653
+        },
+        "/World/cell/left_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_04/shaft": {
+          "first_s": 11.96,
+          "last_s": 15.574,
+          "peak_force_n": 5.68466378071651
+        },
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_right/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_18/shaft": {
+          "first_s": 21.598,
+          "last_s": 22.116,
+          "peak_force_n": 0.7198911882923202
+        },
+        "/World/cell/right_arm/robot/Geometry/world/link0/link1/link2/link3/link4/link5/link6/attachment_site/finger_left/tip_v15_col/finger_tpu_sdf | /World/scene/bolt_18/shaft": {
+          "first_s": 21.622,
+          "last_s": 22.118,
+          "peak_force_n": 1.351120636522645
+        }
+      }
+    }
+  },
+  "notes": [
+    "All times relative to policy start unless identified as Real first logged step.",
+    "Real scene is different; its trajectory is context, not a paired motor-response test.",
+    "Bias-zero is a new live policy run; model diffusion samples and inference timing are not fixed."
+  ],
+  "bias_ab": {
+    "changed_setting_keys": [
+      "gripper_close_bias_left",
+      "gripper_close_bias_right"
+    ],
+    "scene_config_identical": true,
+    "initial_bolt_position_max_difference_mm": 0.005543828091164895,
+    "initial_bolt_angle_max_difference_deg": 0.03376379733707426,
+    "source_configs_identical": true,
+    "contact_model_identical": true
+  },
+  "real_reference": {
+    "path": "/home/plaif/workspace/robotics_lab/outputs/sweep/20260904_235947_boltv2_plain_40k.jsonl",
+    "arms": {
+      "left": {
+        "first_command_le_1pct_s": 21.47445938293822,
+        "tcp_xyz_mm": [
+          542.8751903636446,
+          50.668674629491235,
+          -280.59369296822223
+        ],
+        "command_pct": 0.0
+      },
+      "right": {
+        "first_command_le_1pct_s": 5.220000808825716,
+        "tcp_xyz_mm": [
+          390.2014203263279,
+          -15.588995372859044,
+          -275.5832408260038
+        ],
+        "command_pct": 0.0
+      }
+    }
+  },
+  "camera": {
+    "data_source": "/home/plaif/workspace/pika/data/data_20260904_235111/episode_004.hdf5",
+    "sim": {
+      "fx": 335.95800524934384,
+      "fy": 335.95800524934384,
+      "cx": 320,
+      "cy": 240
+    },
+    "real_data": {
+      "left": {
+        "fx": 393.3166198730469,
+        "fy": 392.185791015625,
+        "ppx": 319.0752868652344,
+        "ppy": 229.52261352539062,
+        "width": 640.0,
+        "height": 480.0,
+        "model": "distortion.inverse_brown_conrady",
+        "coeffs": [
+          -0.05127820000052452,
+          0.05364039167761803,
+          -0.001004353049211204,
+          0.0005265656509436667,
+          -0.01806950569152832
+        ],
+        "sim_to_real_horizontal_scale_ratio": 0.8541668169470769
+      },
+      "right": {
+        "fx": 393.78424072265625,
+        "fy": 392.8046569824219,
+        "ppx": 316.9326477050781,
+        "ppy": 238.19793701171875,
+        "width": 640.0,
+        "height": 480.0,
+        "model": "distortion.inverse_brown_conrady",
+        "coeffs": [
+          -0.051689792424440384,
+          0.055110011249780655,
+          0.00012871657963842154,
+          0.0006693064351566136,
+          -0.017960144206881523
+        ],
+        "sim_to_real_horizontal_scale_ratio": 0.8531524893754201
+      }
+    }
+  },
+  "bias0_bolt_motion": {
+    "bolt_00": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.0023895000485862072,
+      "final_xyz_m": [
+        0.4036325216293335,
+        0.06142508611083031,
+        -0.2658895254135132
+      ]
+    },
+    "bolt_01": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.002825087879712441,
+      "final_xyz_m": [
+        0.4791433811187744,
+        -0.0009349228348582983,
+        -0.2658892869949341
+      ]
+    },
+    "bolt_02": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.016643551471440386,
+      "final_xyz_m": [
+        0.48586833477020264,
+        0.0822809487581253,
+        -0.26588937640190125
+      ]
+    },
+    "bolt_03": {
+      "max_origin_lift_mm": 0.00095367431640625,
+      "final_xy_displacement_mm": 0.3335115462343308,
+      "final_xyz_m": [
+        0.505677342414856,
+        0.1588730663061142,
+        -0.26590755581855774
+      ]
+    },
+    "bolt_04": {
+      "max_origin_lift_mm": 408.57522189617157,
+      "final_xy_displacement_mm": 337.46434283668845,
+      "final_xyz_m": [
+        0.7851833701133728,
+        0.21268734335899353,
+        -0.24937443435192108
+      ]
+    },
+    "bolt_05": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.00021416369604773536,
+      "final_xyz_m": [
+        0.4751300513744354,
+        -0.05054127424955368,
+        -0.2658895254135132
+      ]
+    },
+    "bolt_06": {
+      "max_origin_lift_mm": 0.0009238719940185547,
+      "final_xy_displacement_mm": 0.43233530510007134,
+      "final_xyz_m": [
+        0.5221623182296753,
+        0.016559427604079247,
+        -0.26590755581855774
+      ]
+    },
+    "bolt_07": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.08943131118208925,
+      "final_xyz_m": [
+        0.43778201937675476,
+        0.06013316661119461,
+        -0.26588934659957886
+      ]
+    },
+    "bolt_08": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.07137556390484912,
+      "final_xyz_m": [
+        0.37894928455352783,
+        0.06539108604192734,
+        -0.2658894956111908
+      ]
+    },
+    "bolt_09": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.08243242674273449,
+      "final_xyz_m": [
+        0.44894200563430786,
+        -0.010673846118152142,
+        -0.2658891975879669
+      ]
+    },
+    "bolt_10": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.03373072941326623,
+      "final_xyz_m": [
+        0.4146488308906555,
+        -0.06262681633234024,
+        -0.265889436006546
+      ]
+    },
+    "bolt_11": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.00038743019104003906,
+      "final_xyz_m": [
+        0.3662470281124115,
+        -0.04574136435985565,
+        -0.26588937640190125
+      ]
+    },
+    "bolt_12": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.7573157528732293,
+      "final_xyz_m": [
+        0.5064824223518372,
+        -0.08469587564468384,
+        -0.2658894956111908
+      ]
+    },
+    "bolt_13": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.0045668902632537,
+      "final_xyz_m": [
+        0.3707579970359802,
+        0.013124093413352966,
+        -0.26588940620422363
+      ]
+    },
+    "bolt_14": {
+      "max_origin_lift_mm": 0.019282102584838867,
+      "final_xy_displacement_mm": 21.20746315603771,
+      "final_xyz_m": [
+        0.48759564757347107,
+        -0.11326920241117477,
+        -0.26588934659957886
+      ]
+    },
+    "bolt_15": {
+      "max_origin_lift_mm": 0.0008940696716308594,
+      "final_xy_displacement_mm": 0.38806675183886763,
+      "final_xyz_m": [
+        0.5126659870147705,
+        -0.037834931164979935,
+        -0.26590755581855774
+      ]
+    },
+    "bolt_16": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.03448719801966804,
+      "final_xyz_m": [
+        0.4451768398284912,
+        -0.09142544865608215,
+        -0.26588934659957886
+      ]
+    },
+    "bolt_17": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.23168688489201103,
+      "final_xyz_m": [
+        0.40683475136756897,
+        -0.030315222218632698,
+        -0.26588958501815796
+      ]
+    },
+    "bolt_18": {
+      "max_origin_lift_mm": 16.461551189422607,
+      "final_xy_displacement_mm": 75.12725014700919,
+      "final_xyz_m": [
+        0.567936360836029,
+        -0.1071482002735138,
+        -0.26588940620422363
+      ]
+    },
+    "bolt_19": {
+      "max_origin_lift_mm": 0.0,
+      "final_xy_displacement_mm": 0.004900335841080045,
+      "final_xyz_m": [
+        0.40284889936447144,
+        -0.10228335112333298,
+        -0.26588934659957886
+      ]
+    }
+  },
+  "bias0_gray04_final_geometry": {
+    "min_m": [
+      0.7703189274262741,
+      0.19918781778076872,
+      -0.2584999819159495
+    ],
+    "max_m": [
+      0.8101918999871908,
+      0.22895195885937294,
+      -0.238725320499123
+    ],
+    "whole_bolt_inside_gray_box_and_below_lip": true
+  }
+}

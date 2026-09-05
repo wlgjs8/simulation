@@ -1,0 +1,55 @@
+{
+  "schema": "robotics_lab.isaac_shared_stack.dependencies.v1",
+  "recorded_date": "2026-09-06",
+  "robotics_lab": {
+    "repository": "https://github.com/wlgjs8/robotics_lab.git",
+    "branch": "dev",
+    "revision": "d7bf4461819f4b1493d8268420fab5157f98102c",
+    "bridge": "rb_servo_server/build/rb_isaac_bridge",
+    "real_config_sha256": {
+      "rb_servo_server/config/stack_real.yaml": "98dd0045add8d83efd7f112f19af8335950cf9c5c9269d08d60c9fb3f8ea013e",
+      "policy_runner/config/flow_real_realsense.yaml": "08dff5c97a33b6bb12beec29c6dc1408c76ad439f35baedf257b51d62730c80b"
+    }
+  },
+  "openpi": {
+    "repository": "https://github.com/wlgjs8/pi.git",
+    "observed_head": "98b7e6bf3eab7cecf78e6122fad83449b361fb43",
+    "working_tree_dirty": true,
+    "note": "Existing server/training changes are outside this simulation commit. The observed HEAD is not a complete pin of the live server; inspect hashes and the recorded checkpoint/input contract. Checkpoint weights are external.",
+    "observed_server_source_sha256": {
+      "scripts/serve_policy.py": "9fa83afac9a89e3a7325088a2ac595d17af99bbd4c31434b6870c000f1ca1340",
+      "src/openpi/training/config.py": "8820d8e6fcf21c384abdd810987ea66be8c6f2443126316abda2b14817257d88",
+      "src/openpi/transforms.py": "5eba0f1dbf4161f431333e078a81e7024498ecb6ff0cf22bd314f645e418d1e6",
+      "src/openpi/models/pi0.py": "1740f6b7c922049590123ef2c3bd63630ebb65a9b549cd66dfa362c1ac18afe2",
+      "src/openpi/models/pi0_config.py": "deae9c450931a3b16456690f024d58bb68c90d3155ab756cf263736b184beca1",
+      "src/openpi/models/model.py": "a266b23f42dcb1c2d8c2f366dc6741719ee4ca1946f19320134479acfc5f8a8f"
+    },
+    "client_source_sha256": {
+      "packages/openpi-client/src/openpi_client/__init__.py": "91447944015cec709e8aa7655f7e9d64e1e4508e7023a57fe3746911c0fc6fed",
+      "packages/openpi-client/src/openpi_client/action_chunk_broker.py": "019b9d69cb26cc681331a2f95dbe60a2cc7b02d6d309c5d15b6457ab39798234",
+      "packages/openpi-client/src/openpi_client/base_policy.py": "88e98e0f06293f3c4767db675061664c4bba12f87242ba1e64377d1b8de8069e",
+      "packages/openpi-client/src/openpi_client/image_tools.py": "cf6fff73b8d4d6e2e87b664f41cc3ae30878efb1a4407c9af2c6b87783ae537f",
+      "packages/openpi-client/src/openpi_client/image_tools_test.py": "4df4b0ba0b95ba5e47160039c3e837a64d50c802b419a588211dffbaa732589c",
+      "packages/openpi-client/src/openpi_client/msgpack_numpy.py": "c04568948fcee52b691e3be4b6cffb759f7e79ad67530fcd5d23095a0d13c057",
+      "packages/openpi-client/src/openpi_client/msgpack_numpy_test.py": "2c6dd236720dae716d7bdf842b7d506a165e9563bf9d4376c95289269adcb973",
+      "packages/openpi-client/src/openpi_client/runtime/agent.py": "b559885afd9645a91b9b6ee12a28513295474f987d11b16610fc0479dbe6de5b",
+      "packages/openpi-client/src/openpi_client/runtime/agents/policy_agent.py": "c4d63952d1954bd4b72a3122223df36794812fea74cf1c7023433b5a90473c1c",
+      "packages/openpi-client/src/openpi_client/runtime/environment.py": "1c12e5054b3401dec5f1f8b71eef0f625cb60e2b50784dcf19afa32c77107a7e",
+      "packages/openpi-client/src/openpi_client/runtime/runtime.py": "3daa242a9ce61ffb210789ef3ba6b1e3cade9de757fcd36af7b174c530345ea8",
+      "packages/openpi-client/src/openpi_client/runtime/subscriber.py": "d269a2af8ec4056beb310e5c3c97d4468af01549c7ef80dd905652d8ac64f85b",
+      "packages/openpi-client/src/openpi_client/websocket_client_policy.py": "36557cb0b91ccf31cd4fb4b508306850d76ed0feb4028dac5182d0f5a5d88005"
+    }
+  },
+  "runtime": {
+    "python": "3.12",
+    "isaacsim": "6.0.1.0",
+    "physics_dt_sec": 0.002,
+    "policy_ports": [
+      8001,
+      8002,
+      8003
+    ]
+  },
+  "result_manifest": "docs/results/20260906/manifest.json",
+  "server_input_contract": "docs/results/20260906/server_input_contract.json"
+}

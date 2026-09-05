@@ -1,0 +1,134 @@
+{
+  "right_finger_global_vertical_clearance_min": {
+    "time_sec": 24.95,
+    "min_tip_z_mm": -220.85531591736657,
+    "max_bolt_top_z_mm": -255.24454427870492,
+    "vertical_clearance_mm": 34.38922836133834
+  },
+  "samples": [
+    {
+      "time_sec": 1.94,
+      "min_tip_z_mm": -194.57688016454333,
+      "max_bolt_top_z_mm": -255.24467188354893,
+      "vertical_clearance_mm": 60.667791719005606
+    },
+    {
+      "time_sec": 2.61,
+      "min_tip_z_mm": -206.53855620340954,
+      "max_bolt_top_z_mm": -255.24473177342816,
+      "vertical_clearance_mm": 48.70617557001861
+    },
+    {
+      "time_sec": 5.0,
+      "min_tip_z_mm": -190.32110141747378,
+      "max_bolt_top_z_mm": -255.24458705436177,
+      "vertical_clearance_mm": 64.92348563688799
+    },
+    {
+      "time_sec": 10.000000000000002,
+      "min_tip_z_mm": -192.4190054973055,
+      "max_bolt_top_z_mm": -255.24464011410984,
+      "vertical_clearance_mm": 62.82563461680435
+    },
+    {
+      "time_sec": 15.000000000000002,
+      "min_tip_z_mm": -201.41815046913104,
+      "max_bolt_top_z_mm": -255.24465765607025,
+      "vertical_clearance_mm": 53.82650718693921
+    },
+    {
+      "time_sec": 20.0,
+      "min_tip_z_mm": -148.90816453396943,
+      "max_bolt_top_z_mm": -255.2446636224968,
+      "vertical_clearance_mm": 106.33649908852738
+    },
+    {
+      "time_sec": 24.63,
+      "min_tip_z_mm": -219.77538582208928,
+      "max_bolt_top_z_mm": -255.24460324109793,
+      "vertical_clearance_mm": 35.46921741900866
+    }
+  ],
+  "bolt_motion": {
+    "bolt_00": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.0023895000485862072
+    },
+    "bolt_01": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.002825087879712441
+    },
+    "bolt_02": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.016643551471440386
+    },
+    "bolt_03": {
+      "max_lift_mm": 0.00095367431640625,
+      "final_xy_mm": 0.3335115462343308
+    },
+    "bolt_04": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.2620312670906644
+    },
+    "bolt_05": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.0002707955516187288
+    },
+    "bolt_06": {
+      "max_lift_mm": 0.0008046627044677734,
+      "final_xy_mm": 0.4050037316716151
+    },
+    "bolt_07": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.08781023046135777
+    },
+    "bolt_08": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.07137556390484912
+    },
+    "bolt_09": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.08243242674273449
+    },
+    "bolt_10": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.03373072941326623
+    },
+    "bolt_11": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.00038743019104003906
+    },
+    "bolt_12": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.7754593470481944
+    },
+    "bolt_13": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.004626300619730504
+    },
+    "bolt_14": {
+      "max_lift_mm": 0.0007152557373046875,
+      "final_xy_mm": 0.002015351064526643
+    },
+    "bolt_15": {
+      "max_lift_mm": 0.0008940696716308594,
+      "final_xy_mm": 0.38351012439569393
+    },
+    "bolt_16": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.03880287553409624
+    },
+    "bolt_17": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.07301213232477635
+    },
+    "bolt_18": {
+      "max_lift_mm": 0.0002980232238769531,
+      "final_xy_mm": 0.5646082549194371
+    },
+    "bolt_19": {
+      "max_lift_mm": 0.0,
+      "final_xy_mm": 0.05411992252554227
+    }
+  }
+}

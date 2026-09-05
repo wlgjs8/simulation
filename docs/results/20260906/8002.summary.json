@@ -1,0 +1,2092 @@
+{
+  "settings": {
+    "schema": "robotics_lab.isaac_shared_stack.v1",
+    "robotics_lab": "../robotics_lab",
+    "servo_config": "rb_servo_server/config/stack_real.yaml",
+    "runner_config": "policy_runner/config/flow_real_realsense.yaml",
+    "bridge": "rb_servo_server/build/rb_isaac_bridge",
+    "physics_dt_sec": 0.002,
+    "policy_dt_sec": 0.0334,
+    "camera_dt_sec": 0.03333333333333333,
+    "action_mode": "anchored",
+    "action_horizon": 24,
+    "execute_steps": 4,
+    "runway_steps": 4,
+    "chunk_anchor": "command",
+    "proprio_mode": "velocity_grip",
+    "velproprio_sample_mode": "fixed_step",
+    "velproprio_source": "command",
+    "gripper_proprio_source": "command",
+    "gripper_close_bias_left": 0.0,
+    "gripper_close_bias_right": 0.0,
+    "arm_stiffness": 10000000.0,
+    "arm_damping": 100000.0,
+    "gripper_stiffness": 10000.0,
+    "gripper_damping": 100.0,
+    "gripper_max_force_n": 5.0,
+    "contact": {
+      "enabled": true,
+      "force_sensor": true,
+      "tool_mass_source": "servo_config",
+      "arm_max_effort_nm": [
+        200.0,
+        200.0,
+        200.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "tip_stiffness_n_m": 15000.0,
+      "tip_damping_ns_m": 30.0,
+      "settle_sec": 1.0,
+      "tare_sec": 0.6,
+      "static_force_tolerance_n": 0.5,
+      "static_torque_tolerance_nm": 0.1,
+      "parameter_status": "provisional_sim_contact_profile_not_hardware_identified"
+    },
+    "fk_position_tolerance_m": 0.001,
+    "fk_angle_tolerance_deg": 0.2
+  },
+  "plant": "isaac_physx",
+  "force_control": true,
+  "contact_model": {
+    "sensor": "attachment_site_joint",
+    "input_frame": "flange_at_flange",
+    "sign": "negative incoming reaction = tool load on flange",
+    "contact": {
+      "enabled": true,
+      "force_sensor": true,
+      "tool_mass_source": "servo_config",
+      "arm_max_effort_nm": [
+        200.0,
+        200.0,
+        200.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "tip_stiffness_n_m": 15000.0,
+      "tip_damping_ns_m": 30.0,
+      "settle_sec": 1.0,
+      "tare_sec": 0.6,
+      "static_force_tolerance_n": 0.5,
+      "static_torque_tolerance_nm": 0.1,
+      "parameter_status": "provisional_sim_contact_profile_not_hardware_identified"
+    },
+    "payload": {
+      "left": {
+        "mass_kg": 0.7912001013755798,
+        "com_flange_m": [
+          -2e-05,
+          0.0032400000000000003,
+          0.07034
+        ],
+        "tool_body_mass_before_kg": 1.6194719076156616,
+        "tool_body_mass_kg": 0.6792079977971036,
+        "tool_body_com_m": [
+          -2.3487108502306953e-05,
+          0.003774162583060847,
+          0.05334157821268298
+        ],
+        "inertia_status": "geometry inertia scaled with mass; not identified on hardware",
+        "arm_max_effort_nm": [
+          200.0,
+          200.0,
+          200.0,
+          100.0,
+          100.0,
+          100.0
+        ]
+      },
+      "right": {
+        "mass_kg": 0.7822000980377197,
+        "com_flange_m": [
+          -0.00124,
+          0.004030000000000001,
+          0.07156
+        ],
+        "tool_body_mass_before_kg": 1.6194719076156616,
+        "tool_body_mass_kg": 0.6702079977971036,
+        "tool_body_com_m": [
+          -0.001446556612480665,
+          0.004703312250971259,
+          0.05453717212697984
+        ],
+        "inertia_status": "geometry inertia scaled with mass; not identified on hardware",
+        "arm_max_effort_nm": [
+          200.0,
+          200.0,
+          200.0,
+          100.0,
+          100.0,
+          100.0
+        ]
+      }
+    }
+  },
+  "scene": {
+    "layout": "aligned",
+    "seed": 100,
+    "work_surface": {
+      "schema": "simulation.work_surface.v1",
+      "name": "pika_dark_foam_500x500x20",
+      "size_m": [
+        0.5,
+        0.5,
+        0.02
+      ],
+      "center_xy_m": [
+        0.385,
+        0.0
+      ],
+      "placement_status": "estimated between stand riser and trays; not a measured cell transform",
+      "dimensions_source": "operator 2026-09-06: 500 x 500 x 20 mm",
+      "appearance_source": "pika/data/data_20260904_235111/episode_004.hdf5 right RGB frame 404",
+      "texture": "assets/materials/pika_foam_patch.png",
+      "texture_repeats": 8,
+      "roughness": 0.95,
+      "metallic": 0.0,
+      "contact": {
+        "static_friction": 0.6,
+        "dynamic_friction": 0.5,
+        "restitution": 0.0,
+        "stiffness_n_m": 5000.0,
+        "damping_ns_m": 30.0,
+        "status": "provisional compliant rigid contact; not measured foam properties or volumetric deformation"
+      },
+      "texture_rgb_scale": [
+        0.7,
+        0.75,
+        0.95
+      ],
+      "color_adjustment": "2026-09-06: reduce brightness and yellow tint under Sim lighting; real wrist RGB appearance match, not calibrated albedo",
+      "texture_sha256": "1a65156c738ce078a35572dc570734826de52edabf2c8c1a9a53581b5d292158"
+    },
+    "work_surface_verification": {
+      "min_m": [
+        0.13500000536441803,
+        -0.25,
+        -0.29499998688697815
+      ],
+      "max_m": [
+        0.6349999904632568,
+        0.25,
+        -0.2750000059604645
+      ],
+      "size_m": [
+        0.5,
+        0.5,
+        0.019999980926513672
+      ],
+      "physics_material": "/World/physmat_pick_pad",
+      "stiffness_n_m": 5000.0,
+      "damping_ns_m": 30.0
+    },
+    "pick_surface_z_m": -0.27499999999999997,
+    "bolt_colors": [
+      "gray",
+      "gray",
+      "gray",
+      "gray",
+      "gray",
+      "gray",
+      "gray",
+      "gray",
+      "gray",
+      "gray",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black",
+      "black"
+    ],
+    "bolt_color_counts": {
+      "gray": 10,
+      "black": 10
+    },
+    "visual_bindings": [
+      {
+        "prim": "/World/scene/bolt_00/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_00/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_01/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_01/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_02/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_02/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_03/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_03/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_04/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_04/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_05/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_05/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_06/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_06/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_07/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_07/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_08/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_08/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_09/shaft",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_09/head",
+        "color": "gray",
+        "material": "/World/m/bgray"
+      },
+      {
+        "prim": "/World/scene/bolt_10/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_10/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_11/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_11/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_12/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_12/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_13/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_13/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_14/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_14/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_15/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_15/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_16/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_16/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_17/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_17/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_18/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_18/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_19/shaft",
+        "color": "black",
+        "material": "/World/m/bblack"
+      },
+      {
+        "prim": "/World/scene/bolt_19/head",
+        "color": "black",
+        "material": "/World/m/bblack"
+      }
+    ],
+    "trays": {
+      "box_gray": {
+        "min_m": [
+          0.645,
+          0.07,
+          -0.295
+        ],
+        "max_m": [
+          0.885,
+          0.45,
+          -0.19
+        ],
+        "size_m": [
+          0.24,
+          0.38,
+          0.10499999999999998
+        ],
+        "wall_thickness_m": 0.02
+      },
+      "box_green": {
+        "min_m": [
+          0.645,
+          -0.45,
+          -0.295
+        ],
+        "max_m": [
+          0.885,
+          -0.07,
+          -0.19
+        ],
+        "size_m": [
+          0.24,
+          0.38,
+          0.10499999999999998
+        ],
+        "wall_thickness_m": 0.02
+      }
+    },
+    "support_check": {
+      "count": 20,
+      "all_on_surface": true,
+      "min_bottom_offset_m": -3.547045521218317e-05,
+      "max_bottom_offset_m": -1.5011111778151509e-05
+    },
+    "initial_bolts": [
+      {
+        "p": [
+          0.40363040566444397,
+          0.06142619624733925,
+          -0.26588913798332214
+        ],
+        "q": [
+          0.8969976902008057,
+          -0.02828316017985344,
+          0.05663004517555237,
+          0.43747958540916443
+        ]
+      },
+      {
+        "p": [
+          0.47914066910743713,
+          -0.000935714109800756,
+          -0.2658889889717102
+        ],
+        "q": [
+          0.5910398364067078,
+          -0.05047094449400902,
+          0.038300108164548874,
+          0.8041503429412842
+        ]
+      },
+      {
+        "p": [
+          0.48588210344314575,
+          0.08229029923677444,
+          -0.2658890187740326
+        ],
+        "q": [
+          0.46959924697875977,
+          -0.055551547557115555,
+          0.03046206198632717,
+          0.8806036114692688
+        ]
+      },
+      {
+        "p": [
+          0.505416750907898,
+          0.15908120572566986,
+          -0.26590827107429504
+        ],
+        "q": [
+          0.8998332023620605,
+          -0.028298309072852135,
+          0.056189265102148056,
+          0.43167391419410706
+        ]
+      },
+      {
+        "p": [
+          0.4568168818950653,
+          0.13485655188560486,
+          -0.2658892273902893
+        ],
+        "q": [
+          0.5866477489471436,
+          -0.049240849912166595,
+          0.04014546424150467,
+          0.8073464035987854
+        ]
+      },
+      {
+        "p": [
+          0.4751298427581787,
+          -0.0505412258207798,
+          -0.265889048576355
+        ],
+        "q": [
+          0.003655066480860114,
+          -0.06343184411525726,
+          0.0004961903323419392,
+          0.9979793429374695
+        ]
+      },
+      {
+        "p": [
+          0.5225192904472351,
+          0.016803322359919548,
+          -0.26590824127197266
+        ],
+        "q": [
+          0.46505340933799744,
+          -0.055649951100349426,
+          0.029314439743757248,
+          0.8830454349517822
+        ]
+      },
+      {
+        "p": [
+          0.4378166198730469,
+          0.06005069985985756,
+          -0.2658892273902893
+        ],
+        "q": [
+          0.9767432808876038,
+          -0.012852721847593784,
+          0.06197783723473549,
+          0.20485635101795197
+        ]
+      },
+      {
+        "p": [
+          0.37888646125793457,
+          0.06542496383190155,
+          -0.2658889889717102
+        ],
+        "q": [
+          0.8582571148872375,
+          -0.03224000334739685,
+          0.05447405204176903,
+          0.5093014240264893
+        ]
+      },
+      {
+        "p": [
+          0.44886118173599243,
+          -0.010690051130950451,
+          -0.26588907837867737
+        ],
+        "q": [
+          0.6322722434997559,
+          -0.0483376681804657,
+          0.0409664623439312,
+          0.7721508741378784
+        ]
+      },
+      {
+        "p": [
+          0.4146372079849243,
+          -0.06259515136480331,
+          -0.26588913798332214
+        ],
+        "q": [
+          0.9839678406715393,
+          -0.010762096382677555,
+          0.06237778440117836,
+          0.16673538088798523
+        ]
+      },
+      {
+        "p": [
+          0.36624687910079956,
+          -0.045741721987724304,
+          -0.26588913798332214
+        ],
+        "q": [
+          0.7420750856399536,
+          -0.04133296757936478,
+          0.047962088137865067,
+          0.6673199534416199
+        ]
+      },
+      {
+        "p": [
+          0.5059913396835327,
+          -0.08411936461925507,
+          -0.2658891975879669
+        ],
+        "q": [
+          0.9371123313903809,
+          -0.019148994237184525,
+          0.060397710651159286,
+          0.3432285785675049
+        ]
+      },
+      {
+        "p": [
+          0.37076255679130554,
+          0.013123838230967522,
+          -0.2658892273902893
+        ],
+        "q": [
+          0.6976853609085083,
+          -0.0448925644159317,
+          0.04463035613298416,
+          0.7136021256446838
+        ]
+      },
+      {
+        "p": [
+          0.47497227787971497,
+          -0.1303105354309082,
+          -0.26590803265571594
+        ],
+        "q": [
+          0.3668893277645111,
+          -0.05826540291309357,
+          0.02385620027780533,
+          0.928131639957428
+        ]
+      },
+      {
+        "p": [
+          0.5123404264450073,
+          -0.037623729556798935,
+          -0.2659081816673279
+        ],
+        "q": [
+          0.8711113333702087,
+          0.10912841558456421,
+          0.12980125844478607,
+          0.4608771502971649
+        ]
+      },
+      {
+        "p": [
+          0.44515037536621094,
+          -0.09144756197929382,
+          -0.26588892936706543
+        ],
+        "q": [
+          0.42210623621940613,
+          -0.057955943048000336,
+          0.025610044598579407,
+          0.9043292999267578
+        ]
+      },
+      {
+        "p": [
+          0.40689122676849365,
+          -0.03009052388370037,
+          -0.2658890187740326
+        ],
+        "q": [
+          0.12565138936042786,
+          -0.06298982352018356,
+          0.006833117920905352,
+          0.9900491237640381
+        ]
+      },
+      {
+        "p": [
+          0.5145076513290405,
+          -0.1599636971950531,
+          -0.26588955521583557
+        ],
+        "q": [
+          0.9893704652786255,
+          -0.008078345097601414,
+          0.0628213956952095,
+          0.13089819252490997
+        ]
+      },
+      {
+        "p": [
+          0.4028465747833252,
+          -0.1022876650094986,
+          -0.2658890187740326
+        ],
+        "q": [
+          0.24100174009799957,
+          -0.06162349507212639,
+          0.014691540040075779,
+          0.9684549570083618
+        ]
+      }
+    ]
+  },
+  "source_configs": {
+    "servo_config": {
+      "path": "/home/plaif/workspace/robotics_lab/rb_servo_server/config/stack_real.yaml",
+      "sha256": "98dd0045add8d83efd7f112f19af8335950cf9c5c9269d08d60c9fb3f8ea013e"
+    },
+    "runner_config": {
+      "path": "/home/plaif/workspace/robotics_lab/policy_runner/config/flow_real_realsense.yaml",
+      "sha256": "08dff5c97a33b6bb12beec29c6dc1408c76ad439f35baedf257b51d62730c80b"
+    }
+  },
+  "overrides": [
+    "direct_io",
+    "external_2ms_clock",
+    "synchronous_collision",
+    "physx_joint_force_sensor",
+    "nominal_urdf",
+    "no_hardware_transports"
+  ],
+  "exit_code": 0,
+  "fk_errors": {
+    "left": {
+      "position_m": 9.492694630353071e-07,
+      "angle_deg": 8.008455758142282e-05
+    },
+    "right": {
+      "position_m": 4.768953658640385e-07,
+      "angle_deg": 4.805137624741855e-05
+    }
+  },
+  "checkpoint": {
+    "resolved": true,
+    "pid": 531328,
+    "argv": [
+      ".venv/bin/python",
+      "scripts/serve_policy.py",
+      "--num-medoid-samples",
+      "1",
+      "--port",
+      "8002",
+      "policy:checkpoint",
+      "--policy.config",
+      "pi05_pika_umi_boltv2_anchAB_h24_40k",
+      "--policy.dir",
+      "/home/plaif/workspace/pika_umi_models_v2/boltv2_r5_40k/39999"
+    ],
+    "dir": "/home/plaif/workspace/pika_umi_models_v2/boltv2_r5_40k/39999",
+    "config": "pi05_pika_umi_boltv2_anchAB_h24_40k",
+    "num_medoid_samples": "1"
+  },
+  "checkpoint_contract": {
+    "dataset": "pika_umi_boltv2_train_tcp_anchored_velgrip_k1",
+    "action_mode": "anchored",
+    "norm_stats": "/home/plaif/workspace/pika_umi_models_v2/boltv2_r5_40k/39999/assets/plaif/pika_umi_boltv2_train_tcp_anchored_velgrip_k1/norm_stats.json"
+  },
+  "tare": {
+    "left": {
+      "auto_tare_reason": "",
+      "auto_tare_stage": "off",
+      "axes_determinant": -1.0,
+      "bias_generation": 1,
+      "bias_sensor": [
+        0.0008438020227707952,
+        -0.00011820807796257305,
+        0.0017002476728989464,
+        2.3813161382341048e-05,
+        -8.68365611164643e-05,
+        -1.0390356047391344e-05
+      ],
+      "bias_source": "tare",
+      "bias_valid": true,
+      "comp_sensor_at_sro": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "comp_sensor_at_sro_nodeadzone": [
+        -0.0058174552917480415,
+        0.005551775932312014,
+        0.01929279518127469,
+        3.131344795227059e-05,
+        -0.00015887912034988003,
+        1.3969810679554696e-05
+      ],
+      "comp_stand_axes_at_tcp": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "comp_tool_axes_at_tcp": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "connect_reason": "externally stepped sensor: sample sequence/time verified",
+      "connected": true,
+      "enabled": true,
+      "gravity_sensor_at_sro": [
+        1.2199286255361281,
+        -0.11466748366016609,
+        7.66166038426985,
+        0.027729453680982924,
+        0.031066224578770885,
+        -0.003950275397063852
+      ],
+      "liveness_force_pp_n": 0.0,
+      "liveness_torque_pp_nm": 0.0,
+      "load_force_n": 0.01822216350230245,
+      "load_mass_kg": 0.0018581435558832477,
+      "load_settled": false,
+      "raw_sensor_axes_at_sro": [
+        1.2149549722671509,
+        -0.10923391580581665,
+        7.682653427124023,
+        0.027784580290317537,
+        0.03082050889730454,
+        -0.003946695942431688
+      ],
+      "sensor_offset_mm": [
+        0.0,
+        0.0,
+        45.0
+      ],
+      "tare_reason": "accepted",
+      "tare_samples": 0,
+      "tare_state": "accepted",
+      "tcp_from_sro_mm": [
+        0.0,
+        0.0,
+        202.642
+      ],
+      "tool_com_mm": [
+        -0.02,
+        3.24,
+        25.34
+      ],
+      "tool_mass_kg": 0.7912
+    },
+    "right": {
+      "auto_tare_reason": "",
+      "auto_tare_stage": "off",
+      "axes_determinant": -1.0,
+      "bias_generation": 1,
+      "bias_sensor": [
+        -0.000974117854465364,
+        -8.663632424218459e-05,
+        0.0015915180000395282,
+        2.0738868895450263e-05,
+        9.356088015735792e-05,
+        1.5466975662005513e-05
+      ],
+      "bias_source": "tare",
+      "bias_valid": true,
+      "comp_sensor_at_sro": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "comp_sensor_at_sro_nodeadzone": [
+        -0.004463531970977819,
+        -0.005877525091171287,
+        0.03454176330566394,
+        0.0005429714107513459,
+        4.858851432795741e-07,
+        0.00010376505553722371
+      ],
+      "comp_stand_axes_at_tcp": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "comp_tool_axes_at_tcp": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "connect_reason": "externally stepped sensor: sample sequence/time verified",
+      "connected": true,
+      "enabled": true,
+      "gravity_sensor_at_sro": [
+        -1.3592450245825158,
+        -0.302598951797172,
+        7.543306358739462,
+        0.038436552785452924,
+        -0.026747847968074688,
+        0.005852980149296033
+      ],
+      "liveness_force_pp_n": 0.0,
+      "liveness_torque_pp_nm": 0.0,
+      "load_force_n": 0.031541629233751214,
+      "load_mass_kg": 0.0032163510713394705,
+      "load_settled": false,
+      "raw_sensor_axes_at_sro": [
+        -1.364682674407959,
+        -0.30856311321258545,
+        7.579439640045166,
+        0.03900026306509972,
+        -0.026653801202774052,
+        0.005972212180495262
+      ],
+      "sensor_offset_mm": [
+        0.0,
+        0.0,
+        45.0
+      ],
+      "tare_reason": "accepted",
+      "tare_samples": 0,
+      "tare_state": "accepted",
+      "tcp_from_sro_mm": [
+        0.0,
+        0.0,
+        202.642
+      ],
+      "tool_com_mm": [
+        -1.24,
+        4.03,
+        26.56
+      ],
+      "tool_mass_kg": 0.7822
+    }
+  },
+  "episode_start_time_ns": 1600000000,
+  "physics_ticks": 15301,
+  "active_chunk_arm_ticks": 29630,
+  "sim_elapsed_sec": 30.602,
+  "policy_elapsed_sec": 30.002000000000002,
+  "camera_frames": 919,
+  "chunks": 223,
+  "commands": 14949,
+  "controllers": [
+    "delta_preview",
+    "none",
+    "ruckig_waypoint"
+  ],
+  "fault_latched": false,
+  "fault_reason": "",
+  "inference_timing": [
+    {
+      "request_ns": 1740000000,
+      "service_ns": 95133546,
+      "delivered_ns": 1836000000
+    },
+    {
+      "request_ns": 1872000000,
+      "service_ns": 53160748,
+      "delivered_ns": 1926000000
+    },
+    {
+      "request_ns": 2006000000,
+      "service_ns": 52735087,
+      "delivered_ns": 2060000000
+    },
+    {
+      "request_ns": 2140000000,
+      "service_ns": 51992355,
+      "delivered_ns": 2192000000
+    },
+    {
+      "request_ns": 2274000000,
+      "service_ns": 54166081,
+      "delivered_ns": 2330000000
+    },
+    {
+      "request_ns": 2408000000,
+      "service_ns": 52997198,
+      "delivered_ns": 2462000000
+    },
+    {
+      "request_ns": 2542000000,
+      "service_ns": 51780064,
+      "delivered_ns": 2594000000
+    },
+    {
+      "request_ns": 2676000000,
+      "service_ns": 52288236,
+      "delivered_ns": 2730000000
+    },
+    {
+      "request_ns": 2810000000,
+      "service_ns": 53304338,
+      "delivered_ns": 2864000000
+    },
+    {
+      "request_ns": 2944000000,
+      "service_ns": 52595986,
+      "delivered_ns": 2998000000
+    },
+    {
+      "request_ns": 3078000000,
+      "service_ns": 53523328,
+      "delivered_ns": 3132000000
+    },
+    {
+      "request_ns": 3212000000,
+      "service_ns": 56555477,
+      "delivered_ns": 3270000000
+    },
+    {
+      "request_ns": 3346000000,
+      "service_ns": 54216480,
+      "delivered_ns": 3402000000
+    },
+    {
+      "request_ns": 3480000000,
+      "service_ns": 52578406,
+      "delivered_ns": 3534000000
+    },
+    {
+      "request_ns": 3614000000,
+      "service_ns": 51903285,
+      "delivered_ns": 3666000000
+    },
+    {
+      "request_ns": 3748000000,
+      "service_ns": 54977912,
+      "delivered_ns": 3804000000
+    },
+    {
+      "request_ns": 3882000000,
+      "service_ns": 54071090,
+      "delivered_ns": 3938000000
+    },
+    {
+      "request_ns": 4016000000,
+      "service_ns": 54116461,
+      "delivered_ns": 4072000000
+    },
+    {
+      "request_ns": 4150000000,
+      "service_ns": 51878975,
+      "delivered_ns": 4202000000
+    },
+    {
+      "request_ns": 4284000000,
+      "service_ns": 52424716,
+      "delivered_ns": 4338000000
+    },
+    {
+      "request_ns": 4418000000,
+      "service_ns": 51654344,
+      "delivered_ns": 4470000000
+    },
+    {
+      "request_ns": 4552000000,
+      "service_ns": 54271931,
+      "delivered_ns": 4608000000
+    },
+    {
+      "request_ns": 4686000000,
+      "service_ns": 53206768,
+      "delivered_ns": 4740000000
+    },
+    {
+      "request_ns": 4820000000,
+      "service_ns": 53070818,
+      "delivered_ns": 4874000000
+    },
+    {
+      "request_ns": 4954000000,
+      "service_ns": 53924530,
+      "delivered_ns": 5008000000
+    },
+    {
+      "request_ns": 5088000000,
+      "service_ns": 52311475,
+      "delivered_ns": 5142000000
+    },
+    {
+      "request_ns": 5222000000,
+      "service_ns": 52330996,
+      "delivered_ns": 5276000000
+    },
+    {
+      "request_ns": 5356000000,
+      "service_ns": 52343736,
+      "delivered_ns": 5410000000
+    },
+    {
+      "request_ns": 5490000000,
+      "service_ns": 54902392,
+      "delivered_ns": 5546000000
+    },
+    {
+      "request_ns": 5624000000,
+      "service_ns": 52561227,
+      "delivered_ns": 5678000000
+    },
+    {
+      "request_ns": 5758000000,
+      "service_ns": 55031433,
+      "delivered_ns": 5814000000
+    },
+    {
+      "request_ns": 5890000000,
+      "service_ns": 57033537,
+      "delivered_ns": 5948000000
+    },
+    {
+      "request_ns": 6026000000,
+      "service_ns": 58734672,
+      "delivered_ns": 6086000000
+    },
+    {
+      "request_ns": 6160000000,
+      "service_ns": 61049018,
+      "delivered_ns": 6222000000
+    },
+    {
+      "request_ns": 6294000000,
+      "service_ns": 60093976,
+      "delivered_ns": 6356000000
+    },
+    {
+      "request_ns": 6428000000,
+      "service_ns": 59576324,
+      "delivered_ns": 6488000000
+    },
+    {
+      "request_ns": 6562000000,
+      "service_ns": 62033020,
+      "delivered_ns": 6626000000
+    },
+    {
+      "request_ns": 6696000000,
+      "service_ns": 61229009,
+      "delivered_ns": 6758000000
+    },
+    {
+      "request_ns": 6830000000,
+      "service_ns": 62857053,
+      "delivered_ns": 6894000000
+    },
+    {
+      "request_ns": 6964000000,
+      "service_ns": 63720225,
+      "delivered_ns": 7028000000
+    },
+    {
+      "request_ns": 7098000000,
+      "service_ns": 66122661,
+      "delivered_ns": 7166000000
+    },
+    {
+      "request_ns": 7232000000,
+      "service_ns": 67102084,
+      "delivered_ns": 7300000000
+    },
+    {
+      "request_ns": 7366000000,
+      "service_ns": 53299938,
+      "delivered_ns": 7420000000
+    },
+    {
+      "request_ns": 7500000000,
+      "service_ns": 70274462,
+      "delivered_ns": 7572000000
+    },
+    {
+      "request_ns": 7634000000,
+      "service_ns": 70342912,
+      "delivered_ns": 7706000000
+    },
+    {
+      "request_ns": 7768000000,
+      "service_ns": 70755984,
+      "delivered_ns": 7840000000
+    },
+    {
+      "request_ns": 7902000000,
+      "service_ns": 52734717,
+      "delivered_ns": 7956000000
+    },
+    {
+      "request_ns": 8036000000,
+      "service_ns": 53121938,
+      "delivered_ns": 8090000000
+    },
+    {
+      "request_ns": 8170000000,
+      "service_ns": 54773402,
+      "delivered_ns": 8226000000
+    },
+    {
+      "request_ns": 8304000000,
+      "service_ns": 52162635,
+      "delivered_ns": 8358000000
+    },
+    {
+      "request_ns": 8438000000,
+      "service_ns": 51930465,
+      "delivered_ns": 8490000000
+    },
+    {
+      "request_ns": 8572000000,
+      "service_ns": 55252483,
+      "delivered_ns": 8628000000
+    },
+    {
+      "request_ns": 8706000000,
+      "service_ns": 52479316,
+      "delivered_ns": 8760000000
+    },
+    {
+      "request_ns": 8840000000,
+      "service_ns": 52295666,
+      "delivered_ns": 8894000000
+    },
+    {
+      "request_ns": 8974000000,
+      "service_ns": 53833039,
+      "delivered_ns": 9028000000
+    },
+    {
+      "request_ns": 9108000000,
+      "service_ns": 54798122,
+      "delivered_ns": 9164000000
+    },
+    {
+      "request_ns": 9242000000,
+      "service_ns": 54215760,
+      "delivered_ns": 9298000000
+    },
+    {
+      "request_ns": 9376000000,
+      "service_ns": 53077468,
+      "delivered_ns": 9430000000
+    },
+    {
+      "request_ns": 9510000000,
+      "service_ns": 53369428,
+      "delivered_ns": 9564000000
+    },
+    {
+      "request_ns": 9644000000,
+      "service_ns": 51364823,
+      "delivered_ns": 9696000000
+    },
+    {
+      "request_ns": 9778000000,
+      "service_ns": 52059615,
+      "delivered_ns": 9832000000
+    },
+    {
+      "request_ns": 9912000000,
+      "service_ns": 53658839,
+      "delivered_ns": 9966000000
+    },
+    {
+      "request_ns": 10046000000,
+      "service_ns": 52061775,
+      "delivered_ns": 10100000000
+    },
+    {
+      "request_ns": 10180000000,
+      "service_ns": 55807385,
+      "delivered_ns": 10236000000
+    },
+    {
+      "request_ns": 10314000000,
+      "service_ns": 54107860,
+      "delivered_ns": 10370000000
+    },
+    {
+      "request_ns": 10448000000,
+      "service_ns": 52996587,
+      "delivered_ns": 10502000000
+    },
+    {
+      "request_ns": 10582000000,
+      "service_ns": 52341995,
+      "delivered_ns": 10636000000
+    },
+    {
+      "request_ns": 10716000000,
+      "service_ns": 53160018,
+      "delivered_ns": 10770000000
+    },
+    {
+      "request_ns": 10850000000,
+      "service_ns": 53821109,
+      "delivered_ns": 10904000000
+    },
+    {
+      "request_ns": 10984000000,
+      "service_ns": 52444097,
+      "delivered_ns": 11038000000
+    },
+    {
+      "request_ns": 11118000000,
+      "service_ns": 52471146,
+      "delivered_ns": 11172000000
+    },
+    {
+      "request_ns": 11252000000,
+      "service_ns": 52674586,
+      "delivered_ns": 11306000000
+    },
+    {
+      "request_ns": 11386000000,
+      "service_ns": 51953895,
+      "delivered_ns": 11438000000
+    },
+    {
+      "request_ns": 11520000000,
+      "service_ns": 55321274,
+      "delivered_ns": 11576000000
+    },
+    {
+      "request_ns": 11654000000,
+      "service_ns": 51617624,
+      "delivered_ns": 11706000000
+    },
+    {
+      "request_ns": 11788000000,
+      "service_ns": 52104486,
+      "delivered_ns": 11842000000
+    },
+    {
+      "request_ns": 11922000000,
+      "service_ns": 53333558,
+      "delivered_ns": 11976000000
+    },
+    {
+      "request_ns": 12056000000,
+      "service_ns": 53061817,
+      "delivered_ns": 12110000000
+    },
+    {
+      "request_ns": 12190000000,
+      "service_ns": 53788669,
+      "delivered_ns": 12244000000
+    },
+    {
+      "request_ns": 12324000000,
+      "service_ns": 52758057,
+      "delivered_ns": 12378000000
+    },
+    {
+      "request_ns": 12458000000,
+      "service_ns": 53627289,
+      "delivered_ns": 12512000000
+    },
+    {
+      "request_ns": 12592000000,
+      "service_ns": 54027831,
+      "delivered_ns": 12648000000
+    },
+    {
+      "request_ns": 12726000000,
+      "service_ns": 58869092,
+      "delivered_ns": 12786000000
+    },
+    {
+      "request_ns": 12860000000,
+      "service_ns": 56111855,
+      "delivered_ns": 12918000000
+    },
+    {
+      "request_ns": 12994000000,
+      "service_ns": 62887953,
+      "delivered_ns": 13058000000
+    },
+    {
+      "request_ns": 13128000000,
+      "service_ns": 60806857,
+      "delivered_ns": 13190000000
+    },
+    {
+      "request_ns": 13262000000,
+      "service_ns": 60415397,
+      "delivered_ns": 13324000000
+    },
+    {
+      "request_ns": 13396000000,
+      "service_ns": 62986864,
+      "delivered_ns": 13460000000
+    },
+    {
+      "request_ns": 13530000000,
+      "service_ns": 53875050,
+      "delivered_ns": 13584000000
+    },
+    {
+      "request_ns": 13664000000,
+      "service_ns": 63003783,
+      "delivered_ns": 13728000000
+    },
+    {
+      "request_ns": 13798000000,
+      "service_ns": 66777384,
+      "delivered_ns": 13866000000
+    },
+    {
+      "request_ns": 13932000000,
+      "service_ns": 68417107,
+      "delivered_ns": 14002000000
+    },
+    {
+      "request_ns": 14066000000,
+      "service_ns": 66926843,
+      "delivered_ns": 14134000000
+    },
+    {
+      "request_ns": 14200000000,
+      "service_ns": 52070724,
+      "delivered_ns": 14254000000
+    },
+    {
+      "request_ns": 14334000000,
+      "service_ns": 69685611,
+      "delivered_ns": 14404000000
+    },
+    {
+      "request_ns": 14468000000,
+      "service_ns": 61985491,
+      "delivered_ns": 14530000000
+    },
+    {
+      "request_ns": 14602000000,
+      "service_ns": 53249288,
+      "delivered_ns": 14656000000
+    },
+    {
+      "request_ns": 14736000000,
+      "service_ns": 52398096,
+      "delivered_ns": 14790000000
+    },
+    {
+      "request_ns": 14870000000,
+      "service_ns": 52139295,
+      "delivered_ns": 14924000000
+    },
+    {
+      "request_ns": 15004000000,
+      "service_ns": 55570804,
+      "delivered_ns": 15060000000
+    },
+    {
+      "request_ns": 15138000000,
+      "service_ns": 52538756,
+      "delivered_ns": 15192000000
+    },
+    {
+      "request_ns": 15272000000,
+      "service_ns": 55004792,
+      "delivered_ns": 15328000000
+    },
+    {
+      "request_ns": 15406000000,
+      "service_ns": 52778077,
+      "delivered_ns": 15460000000
+    },
+    {
+      "request_ns": 15540000000,
+      "service_ns": 55757825,
+      "delivered_ns": 15596000000
+    },
+    {
+      "request_ns": 15674000000,
+      "service_ns": 57452809,
+      "delivered_ns": 15732000000
+    },
+    {
+      "request_ns": 15808000000,
+      "service_ns": 57424029,
+      "delivered_ns": 15866000000
+    },
+    {
+      "request_ns": 15942000000,
+      "service_ns": 52988598,
+      "delivered_ns": 15996000000
+    },
+    {
+      "request_ns": 16076000000,
+      "service_ns": 58890033,
+      "delivered_ns": 16136000000
+    },
+    {
+      "request_ns": 16210000000,
+      "service_ns": 52470366,
+      "delivered_ns": 16264000000
+    },
+    {
+      "request_ns": 16344000000,
+      "service_ns": 54783802,
+      "delivered_ns": 16400000000
+    },
+    {
+      "request_ns": 16478000000,
+      "service_ns": 53826000,
+      "delivered_ns": 16532000000
+    },
+    {
+      "request_ns": 16612000000,
+      "service_ns": 52767186,
+      "delivered_ns": 16666000000
+    },
+    {
+      "request_ns": 16746000000,
+      "service_ns": 55855325,
+      "delivered_ns": 16802000000
+    },
+    {
+      "request_ns": 16880000000,
+      "service_ns": 53899700,
+      "delivered_ns": 16934000000
+    },
+    {
+      "request_ns": 17014000000,
+      "service_ns": 52415946,
+      "delivered_ns": 17068000000
+    },
+    {
+      "request_ns": 17148000000,
+      "service_ns": 51703494,
+      "delivered_ns": 17200000000
+    },
+    {
+      "request_ns": 17282000000,
+      "service_ns": 53549609,
+      "delivered_ns": 17336000000
+    },
+    {
+      "request_ns": 17416000000,
+      "service_ns": 52399416,
+      "delivered_ns": 17470000000
+    },
+    {
+      "request_ns": 17550000000,
+      "service_ns": 56061295,
+      "delivered_ns": 17608000000
+    },
+    {
+      "request_ns": 17684000000,
+      "service_ns": 52361156,
+      "delivered_ns": 17738000000
+    },
+    {
+      "request_ns": 17818000000,
+      "service_ns": 54675362,
+      "delivered_ns": 17874000000
+    },
+    {
+      "request_ns": 17952000000,
+      "service_ns": 51997965,
+      "delivered_ns": 18004000000
+    },
+    {
+      "request_ns": 18086000000,
+      "service_ns": 52343936,
+      "delivered_ns": 18140000000
+    },
+    {
+      "request_ns": 18220000000,
+      "service_ns": 51942625,
+      "delivered_ns": 18272000000
+    },
+    {
+      "request_ns": 18354000000,
+      "service_ns": 52321606,
+      "delivered_ns": 18408000000
+    },
+    {
+      "request_ns": 18488000000,
+      "service_ns": 53128237,
+      "delivered_ns": 18542000000
+    },
+    {
+      "request_ns": 18622000000,
+      "service_ns": 52448326,
+      "delivered_ns": 18676000000
+    },
+    {
+      "request_ns": 18756000000,
+      "service_ns": 52786457,
+      "delivered_ns": 18810000000
+    },
+    {
+      "request_ns": 18890000000,
+      "service_ns": 52625906,
+      "delivered_ns": 18944000000
+    },
+    {
+      "request_ns": 19024000000,
+      "service_ns": 54634562,
+      "delivered_ns": 19080000000
+    },
+    {
+      "request_ns": 19158000000,
+      "service_ns": 55084183,
+      "delivered_ns": 19214000000
+    },
+    {
+      "request_ns": 19292000000,
+      "service_ns": 61025478,
+      "delivered_ns": 19354000000
+    },
+    {
+      "request_ns": 19426000000,
+      "service_ns": 59291064,
+      "delivered_ns": 19486000000
+    },
+    {
+      "request_ns": 19560000000,
+      "service_ns": 59855066,
+      "delivered_ns": 19620000000
+    },
+    {
+      "request_ns": 19694000000,
+      "service_ns": 59749525,
+      "delivered_ns": 19754000000
+    },
+    {
+      "request_ns": 19828000000,
+      "service_ns": 60660808,
+      "delivered_ns": 19890000000
+    },
+    {
+      "request_ns": 19962000000,
+      "service_ns": 60894738,
+      "delivered_ns": 20024000000
+    },
+    {
+      "request_ns": 20096000000,
+      "service_ns": 63824235,
+      "delivered_ns": 20160000000
+    },
+    {
+      "request_ns": 20230000000,
+      "service_ns": 62345393,
+      "delivered_ns": 20294000000
+    },
+    {
+      "request_ns": 20364000000,
+      "service_ns": 65382730,
+      "delivered_ns": 20430000000
+    },
+    {
+      "request_ns": 20498000000,
+      "service_ns": 65144779,
+      "delivered_ns": 20564000000
+    },
+    {
+      "request_ns": 20632000000,
+      "service_ns": 68218897,
+      "delivered_ns": 20702000000
+    },
+    {
+      "request_ns": 20766000000,
+      "service_ns": 65073139,
+      "delivered_ns": 20832000000
+    },
+    {
+      "request_ns": 20900000000,
+      "service_ns": 70388832,
+      "delivered_ns": 20972000000
+    },
+    {
+      "request_ns": 21034000000,
+      "service_ns": 69890511,
+      "delivered_ns": 21104000000
+    },
+    {
+      "request_ns": 21168000000,
+      "service_ns": 69410330,
+      "delivered_ns": 21238000000
+    },
+    {
+      "request_ns": 21302000000,
+      "service_ns": 55086383,
+      "delivered_ns": 21358000000
+    },
+    {
+      "request_ns": 21436000000,
+      "service_ns": 52935577,
+      "delivered_ns": 21490000000
+    },
+    {
+      "request_ns": 21570000000,
+      "service_ns": 51895305,
+      "delivered_ns": 21622000000
+    },
+    {
+      "request_ns": 21704000000,
+      "service_ns": 54909223,
+      "delivered_ns": 21760000000
+    },
+    {
+      "request_ns": 21838000000,
+      "service_ns": 54659842,
+      "delivered_ns": 21894000000
+    },
+    {
+      "request_ns": 21972000000,
+      "service_ns": 53276238,
+      "delivered_ns": 22026000000
+    },
+    {
+      "request_ns": 22106000000,
+      "service_ns": 55183213,
+      "delivered_ns": 22162000000
+    },
+    {
+      "request_ns": 22240000000,
+      "service_ns": 52944378,
+      "delivered_ns": 22294000000
+    },
+    {
+      "request_ns": 22374000000,
+      "service_ns": 52237756,
+      "delivered_ns": 22428000000
+    },
+    {
+      "request_ns": 22508000000,
+      "service_ns": 51856045,
+      "delivered_ns": 22560000000
+    },
+    {
+      "request_ns": 22642000000,
+      "service_ns": 53689599,
+      "delivered_ns": 22696000000
+    },
+    {
+      "request_ns": 22776000000,
+      "service_ns": 54010030,
+      "delivered_ns": 22832000000
+    },
+    {
+      "request_ns": 22910000000,
+      "service_ns": 52260545,
+      "delivered_ns": 22964000000
+    },
+    {
+      "request_ns": 23044000000,
+      "service_ns": 52383796,
+      "delivered_ns": 23098000000
+    },
+    {
+      "request_ns": 23178000000,
+      "service_ns": 51736905,
+      "delivered_ns": 23230000000
+    },
+    {
+      "request_ns": 23312000000,
+      "service_ns": 52378216,
+      "delivered_ns": 23366000000
+    },
+    {
+      "request_ns": 23446000000,
+      "service_ns": 54525672,
+      "delivered_ns": 23502000000
+    },
+    {
+      "request_ns": 23580000000,
+      "service_ns": 54280311,
+      "delivered_ns": 23636000000
+    },
+    {
+      "request_ns": 23714000000,
+      "service_ns": 51881594,
+      "delivered_ns": 23766000000
+    },
+    {
+      "request_ns": 23848000000,
+      "service_ns": 57464769,
+      "delivered_ns": 23906000000
+    },
+    {
+      "request_ns": 23982000000,
+      "service_ns": 53424049,
+      "delivered_ns": 24036000000
+    },
+    {
+      "request_ns": 24116000000,
+      "service_ns": 53217108,
+      "delivered_ns": 24170000000
+    },
+    {
+      "request_ns": 24250000000,
+      "service_ns": 51791695,
+      "delivered_ns": 24302000000
+    },
+    {
+      "request_ns": 24384000000,
+      "service_ns": 51796225,
+      "delivered_ns": 24436000000
+    },
+    {
+      "request_ns": 24518000000,
+      "service_ns": 51905475,
+      "delivered_ns": 24570000000
+    },
+    {
+      "request_ns": 24652000000,
+      "service_ns": 53295238,
+      "delivered_ns": 24706000000
+    },
+    {
+      "request_ns": 24786000000,
+      "service_ns": 52540326,
+      "delivered_ns": 24840000000
+    },
+    {
+      "request_ns": 24920000000,
+      "service_ns": 53869450,
+      "delivered_ns": 24974000000
+    },
+    {
+      "request_ns": 25054000000,
+      "service_ns": 52909877,
+      "delivered_ns": 25108000000
+    },
+    {
+      "request_ns": 25188000000,
+      "service_ns": 52264836,
+      "delivered_ns": 25242000000
+    },
+    {
+      "request_ns": 25322000000,
+      "service_ns": 52204935,
+      "delivered_ns": 25376000000
+    },
+    {
+      "request_ns": 25456000000,
+      "service_ns": 53410138,
+      "delivered_ns": 25510000000
+    },
+    {
+      "request_ns": 25590000000,
+      "service_ns": 55106283,
+      "delivered_ns": 25646000000
+    },
+    {
+      "request_ns": 25724000000,
+      "service_ns": 55225964,
+      "delivered_ns": 25780000000
+    },
+    {
+      "request_ns": 25858000000,
+      "service_ns": 57252179,
+      "delivered_ns": 25916000000
+    },
+    {
+      "request_ns": 25992000000,
+      "service_ns": 57396339,
+      "delivered_ns": 26050000000
+    },
+    {
+      "request_ns": 26126000000,
+      "service_ns": 58837883,
+      "delivered_ns": 26186000000
+    },
+    {
+      "request_ns": 26260000000,
+      "service_ns": 52420656,
+      "delivered_ns": 26314000000
+    },
+    {
+      "request_ns": 26394000000,
+      "service_ns": 61619350,
+      "delivered_ns": 26456000000
+    },
+    {
+      "request_ns": 26528000000,
+      "service_ns": 52659807,
+      "delivered_ns": 26582000000
+    },
+    {
+      "request_ns": 26662000000,
+      "service_ns": 61120319,
+      "delivered_ns": 26724000000
+    },
+    {
+      "request_ns": 26796000000,
+      "service_ns": 65301559,
+      "delivered_ns": 26862000000
+    },
+    {
+      "request_ns": 26930000000,
+      "service_ns": 63562655,
+      "delivered_ns": 26994000000
+    },
+    {
+      "request_ns": 27064000000,
+      "service_ns": 63191214,
+      "delivered_ns": 27128000000
+    },
+    {
+      "request_ns": 27198000000,
+      "service_ns": 67253264,
+      "delivered_ns": 27266000000
+    },
+    {
+      "request_ns": 27332000000,
+      "service_ns": 66093591,
+      "delivered_ns": 27400000000
+    },
+    {
+      "request_ns": 27466000000,
+      "service_ns": 69004049,
+      "delivered_ns": 27536000000
+    },
+    {
+      "request_ns": 27600000000,
+      "service_ns": 70821104,
+      "delivered_ns": 27672000000
+    },
+    {
+      "request_ns": 27734000000,
+      "service_ns": 69774811,
+      "delivered_ns": 27804000000
+    },
+    {
+      "request_ns": 27868000000,
+      "service_ns": 71785966,
+      "delivered_ns": 27940000000
+    },
+    {
+      "request_ns": 28002000000,
+      "service_ns": 54240821,
+      "delivered_ns": 28058000000
+    },
+    {
+      "request_ns": 28136000000,
+      "service_ns": 52906188,
+      "delivered_ns": 28190000000
+    },
+    {
+      "request_ns": 28270000000,
+      "service_ns": 52436816,
+      "delivered_ns": 28324000000
+    },
+    {
+      "request_ns": 28404000000,
+      "service_ns": 55125143,
+      "delivered_ns": 28460000000
+    },
+    {
+      "request_ns": 28538000000,
+      "service_ns": 52208356,
+      "delivered_ns": 28592000000
+    },
+    {
+      "request_ns": 28672000000,
+      "service_ns": 54841842,
+      "delivered_ns": 28728000000
+    },
+    {
+      "request_ns": 28806000000,
+      "service_ns": 53313428,
+      "delivered_ns": 28860000000
+    },
+    {
+      "request_ns": 28940000000,
+      "service_ns": 55322684,
+      "delivered_ns": 28996000000
+    },
+    {
+      "request_ns": 29074000000,
+      "service_ns": 53370769,
+      "delivered_ns": 29128000000
+    },
+    {
+      "request_ns": 29208000000,
+      "service_ns": 53049747,
+      "delivered_ns": 29262000000
+    },
+    {
+      "request_ns": 29342000000,
+      "service_ns": 56721937,
+      "delivered_ns": 29400000000
+    },
+    {
+      "request_ns": 29476000000,
+      "service_ns": 51655844,
+      "delivered_ns": 29528000000
+    },
+    {
+      "request_ns": 29610000000,
+      "service_ns": 55814805,
+      "delivered_ns": 29666000000
+    },
+    {
+      "request_ns": 29744000000,
+      "service_ns": 53428869,
+      "delivered_ns": 29798000000
+    },
+    {
+      "request_ns": 29878000000,
+      "service_ns": 53888510,
+      "delivered_ns": 29932000000
+    },
+    {
+      "request_ns": 30012000000,
+      "service_ns": 52223525,
+      "delivered_ns": 30066000000
+    },
+    {
+      "request_ns": 30146000000,
+      "service_ns": 54457071,
+      "delivered_ns": 30202000000
+    },
+    {
+      "request_ns": 30280000000,
+      "service_ns": 54392721,
+      "delivered_ns": 30336000000
+    },
+    {
+      "request_ns": 30414000000,
+      "service_ns": 51942435,
+      "delivered_ns": 30466000000
+    },
+    {
+      "request_ns": 30548000000,
+      "service_ns": 52261236,
+      "delivered_ns": 30602000000
+    },
+    {
+      "request_ns": 30682000000,
+      "service_ns": 53327658,
+      "delivered_ns": 30736000000
+    },
+    {
+      "request_ns": 30816000000,
+      "service_ns": 52678966,
+      "delivered_ns": 30870000000
+    },
+    {
+      "request_ns": 30950000000,
+      "service_ns": 52335076,
+      "delivered_ns": 31004000000
+    },
+    {
+      "request_ns": 31084000000,
+      "service_ns": 52675707,
+      "delivered_ns": 31138000000
+    },
+    {
+      "request_ns": 31218000000,
+      "service_ns": 52762657,
+      "delivered_ns": 31272000000
+    },
+    {
+      "request_ns": 31352000000,
+      "service_ns": 52607047,
+      "delivered_ns": 31406000000
+    },
+    {
+      "request_ns": 31486000000,
+      "service_ns": 52087325,
+      "delivered_ns": 31540000000
+    }
+  ],
+  "wall_elapsed_sec": 200.30076851183549
+}

@@ -1,0 +1,463 @@
+{
+  "requested_policy_seconds": 30,
+  "seed": 100,
+  "layout": "aligned",
+  "work_surface": "foam",
+  "bias": [
+    0,
+    0
+  ],
+  "models": {
+    "8001": {
+      "label": "Base",
+      "tag": "foam_grasp_bias0_20260906",
+      "directory": "/home/plaif/workspace/simulation/outputs/shared_stack/foam_grasp_bias0_20260906",
+      "diagnostics": "/home/plaif/workspace/simulation/outputs/diagnostics/foam_grasp_gap_20260906/bias0",
+      "reused_previous_run": true,
+      "checkpoint": "/home/plaif/workspace/pika_umi_models_v2/boltv2_plain_40k/39999",
+      "process_exit_code": 0,
+      "video": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/8001.mp4",
+      "video_probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 960,
+            "height": 720,
+            "r_frame_rate": "30/1",
+            "nb_read_frames": "918"
+          }
+        ],
+        "format": {
+          "duration": "30.600000"
+        }
+      },
+      "server": {
+        "resolved": true,
+        "pid": 3822885,
+        "argv": [
+          ".venv/bin/python",
+          "scripts/serve_policy.py",
+          "--num-medoid-samples",
+          "1",
+          "--port",
+          "8001",
+          "policy:checkpoint",
+          "--policy.config",
+          "pi05_pika_umi_boltv2_anchAB_h24_40k",
+          "--policy.dir",
+          "/home/plaif/workspace/pika_umi_models_v2/boltv2_plain_40k/39999"
+        ],
+        "dir": "/home/plaif/workspace/pika_umi_models_v2/boltv2_plain_40k/39999",
+        "config": "pi05_pika_umi_boltv2_anchAB_h24_40k",
+        "num_medoid_samples": "1"
+      },
+      "policy_elapsed_sec": 30.002000000000002,
+      "exit_code": 0,
+      "fault_reason": "",
+      "chunks": 223,
+      "metrics": {
+        "episode_exit_code": 0,
+        "fault_reason": "",
+        "band_hz": [
+          3,
+          15
+        ],
+        "filter_edge_trim_sec": 0.5,
+        "note": "Band RMS is tracking error, not task success or an A/B improvement score.",
+        "arms": {
+          "left": {
+            "max_abs_error_deg": 0.6526344011527598,
+            "rms_error_per_joint_deg": [
+              0.0644351066493658,
+              0.05855185248610425,
+              0.10671525583282795,
+              0.08520719524557772,
+              0.07490053931322557,
+              0.13272070119789312
+            ],
+            "max_command_speed_deg_s": 59.673140531421254,
+            "max_measured_speed_deg_s": 53.513126373291016,
+            "tracking_band_rms_per_joint_deg": [
+              0.007256897717464339,
+              0.007173103993349067,
+              0.0099490290830777,
+              0.01416640354102818,
+              0.012639133106208787,
+              0.019302296404451302
+            ]
+          },
+          "right": {
+            "max_abs_error_deg": 0.40647168397787325,
+            "rms_error_per_joint_deg": [
+              0.07185244537896017,
+              0.07209329416922769,
+              0.15591555142200053,
+              0.10673453613829183,
+              0.06274606763138904,
+              0.05052165410650401
+            ],
+            "max_command_speed_deg_s": 37.14245945964745,
+            "max_measured_speed_deg_s": 33.2196044921875,
+            "tracking_band_rms_per_joint_deg": [
+              0.006204955954659447,
+              0.006213596362126621,
+              0.01089789581862412,
+              0.013314082640347148,
+              0.012319621255884344,
+              0.010003110065848057
+            ]
+          }
+        },
+        "force": {
+          "left": {
+            "peak_post_deadzone_wrench_force_n": 61.29202313135202,
+            "p95_post_deadzone_wrench_force_n": 0.0,
+            "max_actual_lead_mm": 15.43753213240583,
+            "max_deviation_mm": 7.424406929390566,
+            "fraction_at_40mm_fence": 0.0,
+            "fraction_gate_below_0p1": 0.0,
+            "fraction_covered": 0.986668444207439
+          },
+          "right": {
+            "peak_post_deadzone_wrench_force_n": 251.6333936836731,
+            "p95_post_deadzone_wrench_force_n": 0.0,
+            "max_actual_lead_mm": 4.171139934256087,
+            "max_deviation_mm": 29.48879857049838,
+            "fraction_at_40mm_fence": 0.0,
+            "fraction_gate_below_0p1": 0.0,
+            "fraction_covered": 0.986668444207439
+          }
+        }
+      }
+    },
+    "8002": {
+      "label": "More data",
+      "tag": "foam_bias0_8002_20260906_0643",
+      "directory": "/home/plaif/workspace/simulation/outputs/shared_stack/foam_bias0_8002_20260906_0643",
+      "diagnostics": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/8002_diagnostics",
+      "reused_previous_run": false,
+      "checkpoint": "/home/plaif/workspace/pika_umi_models_v2/boltv2_r5_40k/39999",
+      "process_exit_code": 0,
+      "video": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/8002.mp4",
+      "video_probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 960,
+            "height": 720,
+            "r_frame_rate": "30/1",
+            "nb_read_frames": "918"
+          }
+        ],
+        "format": {
+          "duration": "30.600000"
+        }
+      },
+      "server": {
+        "resolved": true,
+        "pid": 531328,
+        "argv": [
+          ".venv/bin/python",
+          "scripts/serve_policy.py",
+          "--num-medoid-samples",
+          "1",
+          "--port",
+          "8002",
+          "policy:checkpoint",
+          "--policy.config",
+          "pi05_pika_umi_boltv2_anchAB_h24_40k",
+          "--policy.dir",
+          "/home/plaif/workspace/pika_umi_models_v2/boltv2_r5_40k/39999"
+        ],
+        "dir": "/home/plaif/workspace/pika_umi_models_v2/boltv2_r5_40k/39999",
+        "config": "pi05_pika_umi_boltv2_anchAB_h24_40k",
+        "num_medoid_samples": "1"
+      },
+      "policy_elapsed_sec": 30.002000000000002,
+      "exit_code": 0,
+      "fault_reason": "",
+      "chunks": 223,
+      "metrics": {
+        "episode_exit_code": 0,
+        "fault_reason": "",
+        "band_hz": [
+          3,
+          15
+        ],
+        "filter_edge_trim_sec": 0.5,
+        "note": "Band RMS is tracking error, not task success or an A/B improvement score.",
+        "arms": {
+          "left": {
+            "max_abs_error_deg": 0.5620910449614982,
+            "rms_error_per_joint_deg": [
+              0.0402713692797021,
+              0.029456095293518395,
+              0.08696943483334747,
+              0.06866939012291062,
+              0.06354898918561475,
+              0.09053276343537088
+            ],
+            "max_command_speed_deg_s": 51.60342763437242,
+            "max_measured_speed_deg_s": 46.09046173095703,
+            "tracking_band_rms_per_joint_deg": [
+              0.00837582641921105,
+              0.008560357727121916,
+              0.011383131215154456,
+              0.01592770762315564,
+              0.015230871463456653,
+              0.014072215445190522
+            ]
+          },
+          "right": {
+            "max_abs_error_deg": 0.4224350381726367,
+            "rms_error_per_joint_deg": [
+              0.05002389072047697,
+              0.0440537616276497,
+              0.11754751232987318,
+              0.09553834981765796,
+              0.06010072666089496,
+              0.06339858907820696
+            ],
+            "max_command_speed_deg_s": 38.331620089962826,
+            "max_measured_speed_deg_s": 34.789676666259766,
+            "tracking_band_rms_per_joint_deg": [
+              0.00795173205075827,
+              0.008465855252761422,
+              0.016095975408972635,
+              0.01659143690813952,
+              0.014820714242909266,
+              0.01332601964708638
+            ]
+          }
+        },
+        "force": {
+          "left": {
+            "peak_post_deadzone_wrench_force_n": 31.556132277254818,
+            "p95_post_deadzone_wrench_force_n": 0.0,
+            "max_actual_lead_mm": 8.960259197130537,
+            "max_deviation_mm": 4.318864816302268,
+            "fraction_at_40mm_fence": 0.0,
+            "fraction_gate_below_0p1": 0.0,
+            "fraction_covered": 0.986668444207439
+          },
+          "right": {
+            "peak_post_deadzone_wrench_force_n": 695.4159687925362,
+            "p95_post_deadzone_wrench_force_n": 1.491330891493685,
+            "max_actual_lead_mm": 5.979186351939808,
+            "max_deviation_mm": 40.0,
+            "fraction_at_40mm_fence": 0.0001333155579256099,
+            "fraction_gate_below_0p1": 0.03346220503932809,
+            "fraction_covered": 0.986668444207439
+          }
+        }
+      }
+    },
+    "8003": {
+      "label": "No velocity",
+      "tag": "foam_bias0_8003_20260906_0643",
+      "directory": "/home/plaif/workspace/simulation/outputs/shared_stack/foam_bias0_8003_20260906_0643",
+      "diagnostics": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/8003_diagnostics",
+      "reused_previous_run": false,
+      "checkpoint": "/home/plaif/workspace/pika_umi_models_v2/boltv2_griponly_40k/39999",
+      "process_exit_code": 143,
+      "shutdown_note": "Policy runner reached 30.002 seconds with controller exit 0; results saved, then Simulation App Shutting Down logged and shell returned 143. Video completeness verified separately.",
+      "video": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/8003.mp4",
+      "video_probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 960,
+            "height": 720,
+            "r_frame_rate": "30/1",
+            "nb_read_frames": "918"
+          }
+        ],
+        "format": {
+          "duration": "30.600000"
+        }
+      },
+      "server": {
+        "resolved": true,
+        "pid": 532374,
+        "argv": [
+          ".venv/bin/python",
+          "scripts/serve_policy.py",
+          "--num-medoid-samples",
+          "1",
+          "--port",
+          "8003",
+          "policy:checkpoint",
+          "--policy.config",
+          "pi05_pika_umi_boltv2_anchAB_griponly_h24_40k",
+          "--policy.dir",
+          "/home/plaif/workspace/pika_umi_models_v2/boltv2_griponly_40k/39999"
+        ],
+        "dir": "/home/plaif/workspace/pika_umi_models_v2/boltv2_griponly_40k/39999",
+        "config": "pi05_pika_umi_boltv2_anchAB_griponly_h24_40k",
+        "num_medoid_samples": "1"
+      },
+      "policy_elapsed_sec": 30.002000000000002,
+      "exit_code": 0,
+      "fault_reason": "",
+      "chunks": 223,
+      "metrics": {
+        "episode_exit_code": 0,
+        "fault_reason": "",
+        "band_hz": [
+          3,
+          15
+        ],
+        "filter_edge_trim_sec": 0.5,
+        "note": "Band RMS is tracking error, not task success or an A/B improvement score.",
+        "arms": {
+          "left": {
+            "max_abs_error_deg": 0.5434734200824067,
+            "rms_error_per_joint_deg": [
+              0.04881473350915269,
+              0.03646038773294077,
+              0.07811919886320277,
+              0.08936997695361924,
+              0.0455898493064711,
+              0.1065820191328039
+            ],
+            "max_command_speed_deg_s": 49.230128268572315,
+            "max_measured_speed_deg_s": 44.56153869628906,
+            "tracking_band_rms_per_joint_deg": [
+              0.006111205356688347,
+              0.007878670582772114,
+              0.011577119741514064,
+              0.018277720408316708,
+              0.011024541316287096,
+              0.0157534241439752
+            ]
+          },
+          "right": {
+            "max_abs_error_deg": 0.4724623663192702,
+            "rms_error_per_joint_deg": [
+              0.06427961556165446,
+              0.05397097455281895,
+              0.1209857526419806,
+              0.09025540181787284,
+              0.09790630135983591,
+              0.10472057436248006
+            ],
+            "max_command_speed_deg_s": 43.279202333650346,
+            "max_measured_speed_deg_s": 38.746849060058594,
+            "tracking_band_rms_per_joint_deg": [
+              0.011007066537080827,
+              0.009883087748991725,
+              0.016172474257934687,
+              0.020618716255472597,
+              0.016137278098850884,
+              0.017115580236306577
+            ]
+          }
+        },
+        "force": {
+          "left": {
+            "peak_post_deadzone_wrench_force_n": 18.440504952379825,
+            "p95_post_deadzone_wrench_force_n": 0.0,
+            "max_actual_lead_mm": 5.386878709392956,
+            "max_deviation_mm": 4.190662137358891,
+            "fraction_at_40mm_fence": 0.0,
+            "fraction_gate_below_0p1": 0.0020663911478469538,
+            "fraction_covered": 0.986668444207439
+          },
+          "right": {
+            "peak_post_deadzone_wrench_force_n": 292.9049948322055,
+            "p95_post_deadzone_wrench_force_n": 0.0,
+            "max_actual_lead_mm": 7.66903344285693,
+            "max_deviation_mm": 32.396315956520915,
+            "fraction_at_40mm_fence": 0.0,
+            "fraction_gate_below_0p1": 0.0,
+            "fraction_covered": 0.986668444207439
+          }
+        }
+      }
+    }
+  },
+  "snapshots": {
+    "config/shared_stack.json": {
+      "copy": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/shared_stack.json",
+      "sha256": "c8ee11eab7572cb9348354787cc38007a0ead48a00b9f1e13b3155c4bc862ba6"
+    },
+    "config/work_surface.json": {
+      "copy": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/work_surface.json",
+      "sha256": "67c243d6b016ff7000fb411dee09f65e3f6431557fbd493333932f4865639d99"
+    },
+    "assets/scene_states40_aligned_rb5_foam.json": {
+      "copy": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/scene_states40_aligned_rb5_foam.json",
+      "sha256": "66eda8eb4ee96272f55fa11f88209b3f33d3cf135a0fdd3f6156736fdcbc4427"
+    },
+    "assets/materials/pika_foam_patch.png": {
+      "copy": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/pika_foam_patch.png",
+      "sha256": "1a65156c738ce078a35572dc570734826de52edabf2c8c1a9a53581b5d292158"
+    }
+  },
+  "source_hashes": {
+    "scripts/eval_closed_loop.py": "39b0f8a976812c64006dfa0803ea366d37467b356ef9d36e82437501924ff7e8",
+    "scripts/shared_stack.py": "5c0d8ed0248c9763304e72a9d2f04659871ca1125ffbfc92a0d886080255962d",
+    "scripts/shared_contact.py": "3ebba118d6e1530a8de2ade76cedc6150df38679c49edaba1438d5d71c1ec2e2",
+    "scripts/work_surface.py": "a8aa04439550e4e03483d3cf06cc48e4bea882e02268fd8354fe86cb2450f947"
+  },
+  "comparison_video": "/home/plaif/workspace/simulation/outputs/eval/foam_bias0_compare_8001_8002_8003_20260906_0643/8001_8002_8003_comparison.mp4",
+  "same_scene_verification": {
+    "pairs": {
+      "8001_vs_8002": {
+        "settings": true,
+        "source_configs": true,
+        "contact_model": true,
+        "scene_configuration_identical": true,
+        "initial_bolt_position_max_difference_mm": 0.0,
+        "initial_bolt_angle_max_difference_deg": 2.4148365394514667e-06,
+        "initial_arm_max_difference_deg": 0.0,
+        "wrist_rgb_mae": {
+          "left": 0.5377669270833333,
+          "right": 0.4550857204861111
+        }
+      },
+      "8001_vs_8003": {
+        "settings": true,
+        "source_configs": true,
+        "contact_model": true,
+        "scene_configuration_identical": true,
+        "initial_bolt_position_max_difference_mm": 0.0,
+        "initial_bolt_angle_max_difference_deg": 2.4148365394514667e-06,
+        "initial_arm_max_difference_deg": 0.0,
+        "wrist_rgb_mae": {
+          "left": 0.5453602430555555,
+          "right": 0.46207356770833335
+        }
+      },
+      "8002_vs_8003": {
+        "settings": true,
+        "source_configs": true,
+        "contact_model": true,
+        "scene_configuration_identical": true,
+        "initial_bolt_position_max_difference_mm": 0.0,
+        "initial_bolt_angle_max_difference_deg": 2.4148365394514667e-06,
+        "initial_arm_max_difference_deg": 0.0,
+        "wrist_rgb_mae": {
+          "left": 0.5189973958333334,
+          "right": 0.44679253472222225
+        }
+      }
+    },
+    "current_sources_unchanged": true,
+    "current_assets_unchanged": true,
+    "comparison_probe": {
+      "programs": [],
+      "streams": [
+        {
+          "width": 1920,
+          "height": 550,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "918"
+        }
+      ],
+      "format": {
+        "duration": "30.600000"
+      }
+    }
+  }
+}

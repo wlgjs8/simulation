@@ -1,0 +1,18 @@
+{
+  "source_hdf5": "/home/plaif/workspace/pika/data/data_20260904_235111/episode_004.hdf5",
+  "dataset": "observations/right/images/realsense_color",
+  "frame_index": 404,
+  "crop_xyxy": [
+    110,
+    70,
+    238,
+    198
+  ],
+  "processing": "Unmodified 128x128 RGB crop of empty pad surface; photographed appearance, not calibrated albedo.",
+  "mean_srgb_0_255": [
+    101.685546875,
+    100.6195068359375,
+    90.03564453125
+  ],
+  "image_sha256": "0542d32a394e816d2655dc76745ef921b5738f39a9d8c5c9cf637a72b55dd688"
+}

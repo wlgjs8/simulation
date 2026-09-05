@@ -26,6 +26,7 @@ import json
 import math
 import os
 import pathlib
+import work_surface
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Same PIKA_TIP knob as eval_closed_loop.py -- see the note there. Kept in sync so a scene
@@ -36,18 +37,26 @@ PIKA_TIP = os.environ.get("PIKA_TIP", "v15").lower()
 # scored -- the scene builder and the scorer must not disagree about what "closed" is.
 FINGER_TRAVEL_M = float(os.environ.get(
     "FINGER_TRAVEL_M", "0.049" if PIKA_TIP == "v15" else "0.047"))
-ARM_USD = ROOT / ("assets/rb3_730e_pika_tip_v15/rb3_730e_pika_articulated_sim.usda"
+# Track eval_closed_loop.py: SIM_ARM picks the arm (RB5-850E since 2026-09-05) and the
+# preview must never draw a different robot or stand than the scorer runs.
+SIM_ARM = os.environ.get("SIM_ARM", "rb5_850e").lower()
+ARM_USD = ROOT / (f"assets/{SIM_ARM}_pika_tip_v15/{SIM_ARM}_pika_articulated_sim.usda"
                   if PIKA_TIP == "v15" else
-                  "assets/rb3_730e_pika_articulated_sim/rb3_730e_pika_articulated_sim.usda")
-STAND_USD = ROOT / "assets/dual_rb3_730e_stand_ver3/dual_rb3_730e_stand_ver3.usda"
+                  f"assets/{SIM_ARM}_pika_articulated_sim/{SIM_ARM}_pika_articulated_sim.usda")
+STAND_USD = ROOT / "assets/dual_rb5_850e_stand_only/dual_rb5_850e_stand_only.usda"
+# RB5-850E envelope: r_min 0.1706 / r_max 1.2526 recommended (RB3 was 0.1331 / 1.0583).
+# NOTE the ENFORCED shell on the robot is tighter -- stack_real.yaml safety.reach_constraint
+# r_max_m 1.150 / r_min_m 0.175 -- after a documented 1.250 -> 0.980 -> 1.050 -> 1.150
+# sequence. Use the envelope for "can the arm physically get there", the config for "will the
+# robot let it".
 REACH = (
     pathlib.Path.home()
-    / "workspace/robotics_lab/rb_servo_server/descriptions/reach_envelope_rb3_730e.json"
+    / "workspace/robotics_lab/rb_servo_server/descriptions/reach_envelope_rb5_850e.json"
 )
 
 RESET = {
-    "left": [259.0, 75.6, 129.5, -55.6, -131.2, -161.7],
-    "right": [-253.7, -76.9, -127.6, 65.7, 143.7, 166.9],
+    "left": [-85.721, 36.301, 125.914, -9.832, -123.706, 33.556],
+    "right": [86.320, -28.371, -125.802, -1.274, 123.360, -42.350],
 }
 JOINTS = [
     "base_joint",
@@ -75,13 +84,18 @@ HEAD_R, HEAD_L = 0.0092, 0.012
 # the table with a 12 mm bolt between them is exactly right. The old z = 0 put this rig's
 # whole scene 295 mm too high.
 TABLE_Z = -0.295
+WORK_SURFACE = work_surface.load('foam')
+PICK_SURFACE_Z = work_surface.top_z(WORK_SURFACE, TABLE_Z)
 RISER_H = 0.280           # table top -> stand base plate
 TABLE = dict(cx=0.55, cy=0.0, hx=0.50, hy=0.55, thick=0.012)
-# RISER. Same xy as the stand footprint, by operator instruction. Measured off
-# dual_rb5_850e_stand_ver2.stl: bbox x [-0.120, 0.2815], y +-0.2607, and the plate bottom at
-# z = -0.015. It is a real collidable object -- the arms reach 280 mm below the stand now, so
-# leaving it out would let them swing through the thing that is actually in the way.
-RISER = dict(cx=0.0807, cy=0.0, hx=0.2007, hy=0.2607)
+# RISER. Same xy as the stand's FLOOR-BOLTED BASE PLATE, by operator instruction -- not the
+# whole stand silhouette. The first cut used the mesh bbox (401.5 x 521.4 mm) and was far too
+# big: that bbox is dominated by the upper arm-mounting plate, which overhangs the base.
+# Measured by slicing dual_rb5_850e_stand_ver2.stl at its bottom: from z = -0.015 the section
+# is CONSTANT at x [-0.120, +0.120], y [-0.150, +0.150] -- exactly 240 x 300 mm, centred on
+# the stand axis. It is a real collidable object: the arms reach 280 mm below the stand now,
+# so leaving it out would let them swing through the thing that is actually in the way.
+RISER = dict(cx=0.0, cy=0.0, hx=0.120, hy=0.150)
 # PILE / BOX, from the same 594k-tick teleop extract. Deep points (z < -0.24, i.e. actual
 # picks) cluster at x p50 0.458 / 0.452 and y p50 +0.051 (left, gray) / -0.041 (right, black).
 # THE PILES ARE NEARLY TOUCHING ON THE REAL CELL -- 92 mm apart, against the 320 mm this rig
@@ -93,8 +107,10 @@ PILE_DY = 0.046
 # Box centres are UNCHANGED. The release points measured at x 0.762/0.767 and y +0.253/-0.310
 # both fall inside a 380 x 240 box centred here, so the data corroborates the existing
 # placement rather than contradicting it; releases simply are not at the box centre.
-BOX_X = 0.72   # operator: fine anywhere within reach, but closer to the robot is better
-BOX_DY = 0.215   # 430 mm apart: 380 mm long side + a 50 mm gap
+# See eval_closed_loop.py: moved out 2026-09-05 because the old placement put the box lip
+# over the pick region and the arms fouled it. Values are the measured release clusters.
+BOX_X = 0.765
+BOX_DY = 0.260
 # NPC NTC-321, measured: 380 x 240 x 105 mm outer, 20 mm side wall, 6.5 mm floor,
 # plus a 30 mm sponge insert. Source: robotics_lab commit 83c5458^,
 # camera_server/stereo_worker/box_detect.py -> BOX_DIMS / _open_tray_model().
@@ -116,6 +132,8 @@ ARM_OF_COLOR = {"gray": "left", "black": "right"}
 
 
 def bolt_poses(layout: str, n_per: int, seed: int):
+    if 'size_m' in WORK_SURFACE:
+        return work_surface.placed_bolts(WORK_SURFACE, layout, n_per, seed, PILE_X, PILE_DY)
     import numpy as np
 
     rng = np.random.default_rng(seed)
@@ -148,10 +166,12 @@ def bolt_poses(layout: str, n_per: int, seed: int):
 
 def main() -> int:
     global MOUNT_FRAME
+    global WORK_SURFACE, PICK_SURFACE_Z
     ap = argparse.ArgumentParser()
     ap.add_argument("--layout", choices=["aligned", "random"], default="aligned")
     ap.add_argument("--n-per-color", type=int, default=11)
     ap.add_argument("--seed", type=int, default=3)
+    ap.add_argument('--work-surface', choices=['foam','bare'], default='foam')
     ap.add_argument("--settle-steps", type=int, default=240)
     ap.add_argument("--only", choices=["left", "right"], default=None,
                     help="build a single arm, so a wrist view contains only that arm")
@@ -166,6 +186,8 @@ def main() -> int:
     ap.add_argument("--wrist-cam", action="store_true",
                     help="also render the D405 wrist views (CAD-derived pose)")
     args = ap.parse_args()
+    WORK_SURFACE = work_surface.load(args.work_surface)
+    PICK_SURFACE_Z = work_surface.top_z(WORK_SURFACE, TABLE_Z)
     global MOUNT_FRAME
     if args.only:
         MOUNT_FRAME = {args.only: MOUNT_FRAME[args.only]}
@@ -205,6 +227,7 @@ def main() -> int:
     # specular reflection rather than diffuse albedo.
     MAT = {
         "table": rgb_material("/World/mat/table", (0.42, 0.44, 0.45), 0.42, metallic=0.65),
+        "riser": rgb_material("/World/mat/riser", (0.05, 0.05, 0.055), 0.55, metallic=0.35),
         "green": rgb_material("/World/mat/green", (0.10, 0.38, 0.27), 0.45),
         "boxgray": rgb_material("/World/mat/boxgray", (0.46, 0.47, 0.49), 0.50, metallic=0.35),
         "insert": rgb_material("/World/mat/insert", (0.26, 0.26, 0.28), 0.85),
@@ -255,11 +278,21 @@ def main() -> int:
 
     # ---- table ------------------------------------------------------------
     if not args.bare:
+        work_surface.build(stage, WORK_SURFACE, TABLE_Z)
         static_box(
         "/World/scene/table",
-            (TABLE["cx"], TABLE["cy"], -TABLE["thick"]),
+            (TABLE["cx"], TABLE["cy"], TABLE_Z - TABLE["thick"]),
             (TABLE["hx"], TABLE["hy"], TABLE["thick"]),
             "table",
+        )
+        # The 280 mm riser the stand is bolted to (operator, 2026-09-05). Same xy as the
+        # stand footprint, measured off dual_rb5_850e_stand_ver2.stl. Drawn here for the same
+        # reason the scorer collides with it: the arms reach below the stand now.
+        static_box(
+            "/World/scene/riser",
+            (RISER["cx"], RISER["cy"], TABLE_Z + RISER_H / 2),
+            (RISER["hx"], RISER["hy"], RISER_H / 2),
+            "riser",
         )
 
     # ---- place boxes ------------------------------------------------------
@@ -270,25 +303,26 @@ def main() -> int:
         UsdGeom.Xform.Define(stage, root)
         static_box(
             f"{root}/floor",
-            (BOX_X, cy, b["floor_t"] / 2),
+            (BOX_X, cy, TABLE_Z + b["floor_t"] / 2),
             (b["hw"], b["hd"], b["floor_t"] / 2),
             "boxgray" if wall_key == "boxgray" else "green",
         )
         static_box(
             f"{root}/sponge",
-            (BOX_X, cy, b["floor_t"] + b["sponge_h"] / 2),
+            (BOX_X, cy, TABLE_Z + b["floor_t"] + b["sponge_h"] / 2),
             (b["hw"] - b["t"], b["hd"] - b["t"], b["sponge_h"] / 2),
             "insert",
         )
         h = b["wall_h"]
         for tag, off, half in (
-            ("w_xm", (-b["hw"], 0.0), (b["t"], b["hd"], h)),
-            ("w_xp", (+b["hw"], 0.0), (b["t"], b["hd"], h)),
-            ("w_ym", (0.0, -b["hd"]), (b["hw"], b["t"], h)),
-            ("w_yp", (0.0, +b["hd"]), (b["hw"], b["t"], h)),
+            # Outer dimensions are 240 x 380 mm; wall thickness is 20 mm.
+            ("w_xm", (-b["hw"]+b["t"]/2, 0.0), (b["t"]/2, b["hd"], h)),
+            ("w_xp", (+b["hw"]-b["t"]/2, 0.0), (b["t"]/2, b["hd"], h)),
+            ("w_ym", (0.0, -b["hd"]+b["t"]/2), (b["hw"]-b["t"], b["t"]/2, h)),
+            ("w_yp", (0.0, +b["hd"]-b["t"]/2), (b["hw"]-b["t"], b["t"]/2, h)),
         ):
             static_box(
-                f"{root}/{tag}", (BOX_X + off[0], cy + off[1], h), half, wall_key
+                f"{root}/{tag}", (BOX_X + off[0], cy + off[1], TABLE_Z + h), half, wall_key
             )
 
     # ---- bolts ------------------------------------------------------------
@@ -299,7 +333,8 @@ def main() -> int:
         xf = UsdGeom.Xform.Define(stage, path)
         xf.MakeMatrixXform().Set(
             Gf.Matrix4d().SetRotate(Gf.Rotation(Gf.Vec3d(0, 0, 1), math.degrees(yaw)))
-            * Gf.Matrix4d().SetTranslate(Gf.Vec3d(x, y, SHAFT_R + 0.002))
+            * Gf.Matrix4d().SetTranslate(Gf.Vec3d(x, y, PICK_SURFACE_Z +
+                (HEAD_R + 0.001 if 'size_m' in WORK_SURFACE else SHAFT_R + 0.002)))
         )
         prim = xf.GetPrim()
         UsdPhysics.RigidBodyAPI.Apply(prim)
@@ -408,6 +443,14 @@ def main() -> int:
         )
         art.apply_action(ArticulationAction(joint_positions=q))
 
+    tcp_views = {}
+    for side in MOUNT_FRAME:
+        path = next(str(p.GetPath()) for p in stage.Traverse() if p.GetName() == 'tcp'
+                    and f'/{side}_arm/' in str(p.GetPath()) and p.HasAPI(UsdPhysics.RigidBodyAPI))
+        tcp_views[side] = RigidPrim(path, name='check_tcp_'+side, reset_xform_properties=False)
+        tcp_views[side].initialize()
+    world.step(render=False)
+    reset_tcp_z = {s:float(np.asarray(v.get_world_poses()[0])[0,2]) for s,v in tcp_views.items()}
     for _ in range(args.settle_steps):
         world.step(render=True)
 
@@ -448,21 +491,28 @@ def main() -> int:
     z = np.array(settled) if settled else np.array([0.006])
     print(f"layout={args.layout}  bolts={len(bolt_paths)}")
     # reference: reset-pose TCP heights measured with gravity off (step 2)
-    for side, expect in (("left", 0.2100), ("right", 0.2240)):
+    for side, expect in reset_tcp_z.items():
         got = tcp_z.get(side, float("nan"))
         print(f"  {side:5s} TCP z after settling = {got:.4f} (reset ref {expect:.4f}, "
               f"drop {expect - got:+.4f} m)")
-    print(f"  settled z: min={z.min():.4f} max={z.max():.4f} mean={z.mean():.4f} (expect ~0.006)")
+    print(f"  settled z: min={z.min():.4f} max={z.max():.4f} mean={z.mean():.4f}; pick surface={PICK_SURFACE_Z:.4f}")
     print(f"  reach gate [{r_min:.3f}, {r_max:.3f}] m -> {len(unreachable)} outside")
     for u in unreachable[:5]:
         print(f"    OUT {u}")
     for side, mp in mounts.items():
-        for tag, pt in (("pile", np.array([PILE_X, (1 if side == 'left' else -1) * PILE_DY, 0.006])),
-                        ("box", np.array([BOX_X, (1 if side == 'left' else -1) * BOX_DY, 0.05]))):
+        for tag, pt in (("pile", np.array([PILE_X, (1 if side == 'left' else -1) * PILE_DY, PICK_SURFACE_Z + HEAD_R])),
+                        ("box", np.array([BOX_X, (1 if side == 'left' else -1) * BOX_DY, TABLE_Z + BOX['floor_t'] + BOX['sponge_h']]))):
             print(f"  {side:5s} -> {tag:4s} dist = {np.linalg.norm(pt - mp):.3f} m")
 
-    held = all(abs(tcp_z.get(s_, -9) - e_) < 0.02 for s_, e_ in (('left', 0.2100), ('right', 0.2240)) if s_ in MOUNT_FRAME)
-    ok = held if args.bare else (z.min() > -0.01 and z.max() < 0.06 and not unreachable and held)
+    held = all(abs(tcp_z.get(s_, -9) - e_) < 0.02 for s_, e_ in reset_tcp_z.items())
+    if not args.bare:
+        work_surface.verify_stage(stage,WORK_SURFACE,TABLE_Z)
+        poses=[]
+        for path,_ in bolt_paths:
+            p,q=bolt_views[path].get_world_poses()
+            poses.append(dict(p=np.asarray(p)[0].tolist(),q=np.asarray(q)[0].tolist()))
+        work_surface.verify_bolts(WORK_SURFACE,TABLE_Z,poses)
+    ok = held if args.bare else (not unreachable and held)
     print(f"  arms held at reset pose: {held}")
     print(f"gate: {'PASS' if ok else 'FAIL'}")
 

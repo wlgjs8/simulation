@@ -1,0 +1,46 @@
+{
+  "8001": {
+    "config": "pi05_pika_umi_boltv2_anchAB_h24_40k",
+    "mask_velocity_sentinel": false
+  },
+  "8002": {
+    "config": "pi05_pika_umi_boltv2_anchAB_h24_40k",
+    "mask_velocity_sentinel": false
+  },
+  "8003": {
+    "config": "pi05_pika_umi_boltv2_anchAB_griponly_h24_40k",
+    "mask_velocity_sentinel": true,
+    "masked_state_dims": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "preserved_gripper_dims": [
+      6,
+      13
+    ],
+    "post_normalization_sentinel": 1.5
+  },
+  "common": {
+    "action_mode": "anchored",
+    "action_horizon": 24,
+    "image_keys": [
+      "left_wrist_0_rgb",
+      "right_wrist_0_rgb"
+    ],
+    "client_wire_state_dimensions": 14
+  },
+  "source_files": {
+    "src/openpi/training/config.py": "8820d8e6fcf21c384abdd810987ea66be8c6f2443126316abda2b14817257d88",
+    "src/openpi/transforms.py": "5eba0f1dbf4161f431333e078a81e7024498ecb6ff0cf22bd314f645e418d1e6"
+  }
+}

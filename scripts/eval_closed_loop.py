@@ -37,6 +37,7 @@ import time
 import os
 import sys
 import numpy as np
+import work_surface
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # FINGERTIP. The robot runs the v15 tip -- rigid PLA spine + TPU 95A blade printed in
@@ -100,11 +101,22 @@ HEAD_R, HEAD_L = 0.0092, 0.012
 # whose base plate reaches 15 mm below its own origin), and the two bolt piles sit 92 mm
 # apart, not 320. Both were measured off 594k ticks of real stand-frame TCP, 2026-09-04.
 TABLE_Z = -0.295
+WORK_SURFACE = work_surface.load('foam')
+PICK_SURFACE_Z = work_surface.top_z(WORK_SURFACE, TABLE_Z)
 RISER_H = 0.280
 TABLE = dict(cx=0.55, cy=0.0, hx=0.50, hy=0.55, thick=0.012)
-RISER = dict(cx=0.0807, cy=0.0, hx=0.2007, hy=0.2607)
+# 240 x 300 mm, the stand's floor-bolted base plate, centred on the stand axis (measured by
+# slicing the stand STL at its bottom face). NOT the mesh bbox -- see build_scene.py.
+RISER = dict(cx=0.0, cy=0.0, hx=0.120, hy=0.150)
 PILE_X, PILE_DY = 0.455, 0.046
-BOX_X, BOX_DY = 0.72, 0.215
+# 2026-09-05: boxes pushed out. At 0.72 / 0.215 the gray box's near faces sat at x 0.60 and
+# y 0.025 -- and the RB5 piles are at x 0.455, y +-0.046, so the box lip was directly over
+# the pick region and the arms fouled it while picking (operator). Moved onto the MEASURED
+# release clusters instead of the montage estimate: x p50 0.762/0.767, |y| 0.253/0.310 over
+# the 2026-09-04 teleop sessions. Near faces now x 0.645, y 0.070.
+# CAVEAT: a release point is where the TCP was, not where the box centre is, so this is a
+# better estimate than 0.72 was, not a measurement of the box. Confirm against the cell.
+BOX_X, BOX_DY = 0.765, 0.260
 BOX = dict(hw=0.120, hd=0.190, wall_h=0.0525, t=0.020, floor_t=0.0065, sponge_h=0.030)
 ARM_OF_COLOR = {"gray": "left", "black": "right"}
 # top-view left box is green (black bolts), right is gray (gray bolts)
@@ -398,6 +410,90 @@ AF_BETA_ANG = float(os.environ.get("AF_BETA_ANG", "1.0"))
 # Ported 2026-09-03 on the operator's "match the deployed controller even at the cost of
 # success rate" decision. It is NOT a sim-side damping guard invented to hide tremor -- that
 # is what CLAUDE.md forbids -- it is a stage the robot runs on every segment.
+# ---- the obstruction layers the robot runs and this rig did not -------------------------
+# Ported 2026-09-05 after the RB5 cell showed both arms commanded ~150 mm THROUGH the table
+# (right arm z -0.288 -> -0.438 in one second, tracking error 212 mm) while the operator
+# reports the same checkpoint pick-and-placing cleanly on hardware. Nothing was wrong with
+# PhysX: the rig simply had no way to stop asking for a pose the arm cannot reach, and with
+# `chunk_anchor=command` the anchor sinks with the command, so the runaway feeds itself.
+# rb_servo_server has three layers between the plan and the drives; none existed here.
+#
+# 1. ROI BOX + REACH SHELL (safety.roi_box / safety.reach_constraint). Hard geometric bounds
+#    on the commanded TCP, enforced with a velocity damper on the real robot. Values are
+#    stack_real.yaml's, in the stand frame.
+# 0. LEAD CLAMP -- the one the delta_preview follower actually runs, and the simplest.
+#    `delta_twist_follower.cpp:491` scaleLinearTo(&lead, cfg_.max_lead_m) with
+#    stack_real.yaml `delta_twist_max_lead_m: 0.020` / `delta_twist_max_lead_rad: 0.060`:
+#    THE PLAN MAY NEVER BE MORE THAN 20 mm AHEAD OF THE ROBOT. That single bound is why a
+#    real command cannot wind 150 mm into the table, and why the real anchor cannot ratchet
+#    -- with `chunk_anchor=command` the anchor is FK(q_sent), so bounding the sent command to
+#    the arm bounds the anchor to the arm too. This rig had no such bound: the operator saw
+#    the tool descend-rise-descend and walk DOWN a step each chunk (2026-09-05), which is
+#    exactly an unbounded lead being re-anchored once per boundary.
+LEAD_CLAMP_ENABLE = os.environ.get("LEAD_CLAMP_ENABLE", "1") == "1"
+MAX_LEAD_M = float(os.environ.get("DELTA_TWIST_MAX_LEAD_M", "0.020"))
+MAX_LEAD_RAD = float(os.environ.get("DELTA_TWIST_MAX_LEAD_RAD", "0.060"))
+ROI_ENABLE = os.environ.get("ROI_ENABLE", "1") == "1"
+ROI_MIN = np.array([0.300, -0.400, -0.400])
+ROI_MAX = np.array([1.100, 0.400, 0.590])
+REACH_R_MIN = float(os.environ.get("REACH_R_MIN", "0.175"))
+REACH_R_MAX = float(os.environ.get("REACH_R_MAX", "1.150"))
+# 2. CONTACT HOLD-BACK (cartesian_chunk_follower.cpp:313-331). Whatever the projection above
+#    removed is a direction the plan must stop advancing along. The real follower projects the
+#    plan advance onto that direction and subtracts the blocked component, bounded to one
+#    segment of travel at the linear velocity limit so a large removal cannot encode stale lag
+#    as fresh contact.
+HOLDBACK_ENABLE = os.environ.get("HOLDBACK_ENABLE", "1") == "1"
+# 3. PLAN GATE (safety.plan_gate, plan_gate.hpp planGateStep). A first-order gate on the PLAN
+#    CLOCK: the ratio of the realized joint step projected onto the requested one,
+#    (r . q)/|q|^2, low-passed with separate attack and release. While the arm is obstructed
+#    the chunk stops flowing, so the command cannot outrun the robot. The gate input is
+#    post-clamp / pre-projection on purpose -- only an obstruction may close it.
+#    Constants are stack_real.yaml's.
+PLAN_GATE_ENABLE = os.environ.get("PLAN_GATE_ENABLE", "1") == "1"
+# WHAT CLOSES THE GATE. On the robot `setAdvanceGate` is fed by the FORCE controller -- the
+# gate is a contact gate, and the geometric layers (floor_constraint) are switched OFF there
+# (`enable: false`, 2026-07-12, so the damper cannot alter bolt-pick proprioception). So the
+# thing that stops a real command from winding 100 mm into the table is measured CONTACT, not
+# a geometric face. This rig has no F/T sensor but it has the contact itself, and the honest
+# reading of it is how much of the commanded joint step the arm actually realized.
+#   contact     (default) requested = IK output, realized = measured joints. The physical
+#               analogue of the force gate.
+#   projection  requested vs post-ROI/reach command, i.e. the literal C++ input. Only an
+#               explicit geometric face can close it -- which in this cell almost never
+#               happens, because the ROI floor sits 105 mm BELOW the table.
+PLAN_GATE_SOURCE = os.environ.get("PLAN_GATE_SOURCE", "contact").lower()
+# ...AND WHAT MUST NOT CLOSE IT. The robot compares two COMMANDS, so its ratio has no lag
+# term. Comparing a command to a MEASUREMENT does: the PhysX position drive trails by a
+# first-order 7.7 ms (= kd/kp, measured), which at 170 deg/s is 0.34 deg/tick of perfectly
+# healthy lag -- seven times the 0.05 deg deadband. Fed raw it closed the gate to 0.03 in
+# free space and would have paced the whole task down. Compare the measurement against the
+# command from one drive lag ago, which is the command it is actually chasing.
+PLAN_GATE_LAG_SUBSTEPS = int(os.environ.get("PLAN_GATE_LAG_SUBSTEPS", "4"))
+# PERSISTENCE. This is the whole design on the robot and it was learned the hard way there:
+# feeding TRANSIENT shortfalls (the joint-limit barrier, the acceleration clamp) into the plan
+# gate was measured and REVERTED -- "the barrier's job is to hold ONE joint at its standoff,
+# so realized < requested is permanently true there while it works correctly", and pacing all
+# six joints off that produced a 4.8 Hz ripple at 2.1-2.8x the baseline tremble. Only a
+# SUSTAINED condition may pace the plan (ikThrottlePlanGateStep engages on a run of throttled
+# ticks, measured at 150 consecutive).
+# Measured here 2026-09-05 without it: the right arm's gate averaged 0.46, i.e. its chunk
+# advanced at HALF speed for the whole episode, and the operator's read of the render was
+# "much slower than real". Every tick of ordinary tracking shortfall was being charged as an
+# obstruction. 25 substeps = 50 ms of continuous shortfall before the gate may close.
+PLAN_GATE_PERSIST = int(os.environ.get("PLAN_GATE_PERSIST_SUBSTEPS", "25"))
+PLAN_GATE_ENGAGE = float(os.environ.get("PLAN_GATE_ENGAGE_RATIO", "0.8"))
+PLAN_GATE_ATTACK = float(os.environ.get("PLAN_GATE_ATTACK", "0.1"))
+PLAN_GATE_RELEASE = float(os.environ.get("PLAN_GATE_RELEASE", "0.02"))
+PLAN_GATE_DEADBAND = np.deg2rad(float(os.environ.get("PLAN_GATE_DEADBAND_DEG", "0.05")))
+PLAN_GATE_MIN = float(os.environ.get("PLAN_GATE_MIN", "0.0"))
+# 4. PROJECTION-ERROR FAULT (ruckig_follower.preview_max_projection_error_*). The robot gives
+#    up loudly when the solve cannot reach the knot for N consecutive segments. This rig used
+#    to diverge in silence, which is how a 200 mm tracking error reached a summary file.
+PROJ_ERR_M = float(os.environ.get("PREVIEW_MAX_PROJECTION_ERROR_M", "0.002"))
+PROJ_ERR_RAD = float(os.environ.get("PREVIEW_MAX_PROJECTION_ERROR_RAD", "0.00436332313"))
+PROJ_ERR_N = int(os.environ.get("PREVIEW_MAX_CONSECUTIVE_PROJECTION_ERRORS", "12"))
+
 CORNER_SCALE = float(os.environ.get("CORNER_VELOCITY_SCALE", "0.25"))
 CORNER_DB_LIN = float(os.environ.get("CORNER_DEADBAND_LIN_M", "0.0003"))
 CORNER_DB_ANG = float(os.environ.get("CORNER_DEADBAND_ANG_RAD", "0.0005"))
@@ -450,6 +546,10 @@ IK_DAMPING = float(os.environ.get("IK_DAMPING", "0.02"))
 IK_DAMPING_MAX = float(os.environ.get("IK_DAMPING_MAX", "0.08"))
 IK_SINGULAR_EPS = float(os.environ.get("IK_SINGULAR_EPS", "0.10"))
 IK_MAX_ITERS = int(os.environ.get("IK_MAX_ITERS", "100"))
+# Once the target is this far away the solve is not going to converge inside the budget and
+# grinding through 100 SVDs per substep only buys wall clock. Stand in for ik.timeout_ms.
+IK_FAR_M = float(os.environ.get("IK_FAR_M", "0.05"))
+IK_FAR_ITERS = int(os.environ.get("IK_FAR_ITERS", "8"))
 IK_MIN_ITERS = int(os.environ.get("IK_MIN_ITERS", "1"))
 IK_POS_TOL = float(os.environ.get("IK_POS_TOL_M", "0.00002"))
 IK_ORI_TOL = float(os.environ.get("IK_ORI_TOL_RAD", "0.0002"))
@@ -612,6 +712,59 @@ def _rpy(r, p, y):
 
 
 TOOL_XF = _tool_xf()
+
+
+def project_command(p, mount_p):
+    """Clamp a commanded TCP into the ROI box and the reach shell.
+
+    The robot's `safety.roi_box` and `safety.reach_constraint`, in the stand frame. On
+    hardware these run a velocity damper into the face; here the clamp is hard, which is the
+    conservative half -- it cannot let the command through, only stop it early.
+
+    Returns `(clamped, removed)` where `removed = requested - clamped` is the direction the
+    obstruction took away. That vector is what the contact hold-back and the plan gate below
+    both consume, exactly as `into_contact_dir_` and the pre/post-projection pair do on the
+    robot.
+    """
+    if not ROI_ENABLE:
+        return np.asarray(p, dtype=float), np.zeros(3)
+    q = np.clip(np.asarray(p, dtype=float), ROI_MIN, ROI_MAX)
+    d = q - np.asarray(mount_p, dtype=float)
+    r = float(np.linalg.norm(d))
+    if r > 1e-9:
+        r_cl = min(max(r, REACH_R_MIN), REACH_R_MAX)
+        if r_cl != r:
+            q = np.asarray(mount_p, dtype=float) + d * (r_cl / r)
+    return q, np.asarray(p, dtype=float) - q
+
+
+def plan_gate_step(gate, requested_q, final_q, prev_q, persist_ok=True):
+    """One tick of rb_servo_server's planGateStep (control/plan_gate.hpp).
+
+    Ratio is the realized step PROJECTED onto the requested one, (r.q)/|q|^2 -- not a ratio
+    of two independent per-joint maxima, which credited J1's request against J4's realization
+    and read a preserved tangential slide as a full block. Attack and release never run on
+    the same tick. The deadband is on the Euclidean step norm so idle and hold ticks cannot
+    drive the gate.
+    """
+    req = np.asarray(requested_q) - np.asarray(prev_q)
+    got = np.asarray(final_q) - np.asarray(prev_q)
+    req_sq = float(req @ req)
+    if math.sqrt(req_sq) > PLAN_GATE_DEADBAND and req_sq > 1e-18:
+        inst = min(max(float(got @ req) / req_sq, PLAN_GATE_MIN), 1.0)
+        if inst < gate and persist_ok:
+            return gate + PLAN_GATE_ATTACK * (inst - gate)
+    return gate + PLAN_GATE_RELEASE * (1.0 - gate)
+
+
+def plan_gate_ratio(requested_q, final_q, prev_q):
+    """The instantaneous realized/requested ratio, for the persistence counter."""
+    req = np.asarray(requested_q) - np.asarray(prev_q)
+    got = np.asarray(final_q) - np.asarray(prev_q)
+    req_sq = float(req @ req)
+    if math.sqrt(req_sq) <= PLAN_GATE_DEADBAND or req_sq <= 1e-18:
+        return 1.0
+    return min(max(float(got @ req) / req_sq, 0.0), 1.0)
 
 
 def _axis_rot(axis, q):
@@ -861,6 +1014,9 @@ class FollowerOutputSmd:
 
 
 def bolt_poses(layout, n_per, seed):
+    if 'size_m' in WORK_SURFACE:
+        return work_surface.placed_bolts(WORK_SURFACE, layout, n_per, seed, PILE_X, PILE_DY,
+                                         float(os.environ.get('BOLT_SPREAD', '1.0')))
     rng = np.random.default_rng(seed)
     out = []
     spread = float(os.environ.get("BOLT_SPREAD", "1.0"))
@@ -960,6 +1116,8 @@ def _provenance(args, server_metadata: dict | None) -> dict:
                 if k.startswith(prefixes) or k in names},
         # ... and the values that actually APPLIED, defaults included.
         "effective": {
+            "work_surface": WORK_SURFACE,
+            "pick_surface_z_m": PICK_SURFACE_Z,
             "GRIP_PROPRIO": GRIP_PROPRIO, "GRIP_LEAD": GRIP_LEAD, "GRIP_BIAS": GRIP_BIAS,
             "GRIP_LAG_MS": GRIP_LAG_MS, "GRIP_FLOOR": GRIP_FLOOR,
             "STATE_MODE": STATE_MODE, "ACTION_MODE": ACTION_MODE, "IK_LAMBDA": IK_LAMBDA,
@@ -998,8 +1156,15 @@ def _provenance(args, server_metadata: dict | None) -> dict:
 
 def main() -> int:
     global RTC_ENABLED, RTC_INFERENCE_DELAY, CHUNK_EXECUTE_STEPS
+    global WORK_SURFACE, PICK_SURFACE_Z
     ap = argparse.ArgumentParser()
     ap.add_argument("--episodes", type=int, default=20)
+    ap.add_argument("--shared-stack", action="store_true",
+                    help="use robotics_lab policy_runner and full C++ servo loop (one episode)")
+    ap.add_argument("--shared-config", default=str(ROOT / "config/shared_stack.json"))
+    ap.add_argument("--shared-replay", help="Offline policy-input log directory; shared controller and F/T stay live")
+    ap.add_argument("--shared-hold", action="store_true",
+                    help="validate the shared PhysX plant with Hold, without policy inference")
     ap.add_argument("--layout", choices=["aligned", "random"], default="aligned")
     ap.add_argument("--seed", type=int, default=100)
     ap.add_argument("--n-per-color", type=int, default=10,
@@ -1016,6 +1181,10 @@ def main() -> int:
     # execute - prefetch_at). Emulating that here is what makes the sim comparable to
     # the robot: a synchronous infer() at the boundary would give every executed row a
     # freshness the real robot never has.
+    # RTC OFF by default since 2026-09-05: the operator's own rollout command for these
+    # checkpoints carries FLOW_INFER_RTC=0, and the .meta of every 2026-09-04 boltv2 rollout
+    # in robotics_lab/outputs/sweep agrees. The rig defaulting it on was scoring a different
+    # deployment than the robot runs. --rtc still turns it on for an A/B.
     ap.add_argument("--rtc", action="store_true", default=False,
                     help="FLOW_INFER_RTC=1: freeze the first (execute-prefetch_at) rows to the "
                          "previous plan and inpaint the rest (server-side, zeros schedule)")
@@ -1039,12 +1208,29 @@ def main() -> int:
     # load it, so every arm is scored on a bit-identical start state.
     ap.add_argument("--scene-states", default=None,
                     help="JSON of settled bolt poses to load instead of settling")
+    ap.add_argument('--work-surface', choices=['foam','bare'], default='foam',
+                    help='500x500x20mm dark foam pad, or historical bare table')
     ap.add_argument("--oracle", action="store_true", default=False,
                     help="replace the policy with a privileged-state scripted planner "
                          "(same scene, same controller, same scoring) to measure the CEILING")
     ap.add_argument("--dump-scene-states", default=None,
                     help="settle as usual, then write the settled poses here and exit")
     args = ap.parse_args()
+    WORK_SURFACE = work_surface.load(args.work_surface)
+    PICK_SURFACE_Z = work_surface.top_z(WORK_SURFACE, TABLE_Z)
+    if args.shared_replay and (not args.shared_stack or args.shared_hold):
+        ap.error('--shared-replay requires --shared-stack and cannot be combined with --shared-hold')
+    if args.shared_stack:
+        if args.episodes != 1 or args.oracle or args.protocol != "free":
+            ap.error("--shared-stack requires --episodes 1, --protocol free, and no --oracle")
+        if DRIVE_MODE != "drive":
+            ap.error("--shared-stack requires DRIVE_MODE=drive")
+        shared_config = json.loads(pathlib.Path(args.shared_config).read_text())
+        if args.rtc or args.execute_steps != shared_config["execute_steps"]:
+            ap.error("shared policy timing is selected by --shared-config; do not mix legacy --rtc/--execute-steps")
+        if not math.isfinite(args.episode_sec) or args.episode_sec <= 0:
+            ap.error("--episode-sec must be positive")
+        os.environ["GRIP_MAXF"] = str(shared_config["gripper_max_force_n"])
     if args.protocol in ("std20", "std40"):
         n = 20 if args.protocol == "std20" else 40
         args.episodes, args.seed, args.episode_sec = n, 100, 30.0
@@ -1058,6 +1244,8 @@ def main() -> int:
     _SCENE_STATES, _DUMP = {}, {}
     if args.scene_states:
         _SCENE_STATES = json.loads(pathlib.Path(args.scene_states).read_text())
+        for frozen in _SCENE_STATES.values():
+            work_surface.check_frozen(frozen, WORK_SURFACE)
         print(f"[eval] frozen scenes: {len(_SCENE_STATES)} seeds from {args.scene_states}")
     RTC_ENABLED = bool(args.rtc)
     CHUNK_EXECUTE_STEPS = int(args.execute_steps)
@@ -1162,6 +1350,7 @@ def main() -> int:
 
     sbox("/World/scene/table", (TABLE["cx"], TABLE["cy"], TABLE_Z - TABLE["thick"]),
          (TABLE["hx"], TABLE["hy"], TABLE["thick"]), "table")
+    work_surface.build(stage, WORK_SURFACE, TABLE_Z)
     # The riser the stand is bolted to. Black, stand footprint (operator, 2026-09-05). It
     # spans table top -> stand base plate, so the arms cannot swing through the one large
     # object that is now directly under them.
@@ -1177,10 +1366,12 @@ def main() -> int:
         sbox(f"{r}/sponge", (BOX_X, cy, TABLE_Z + b["floor_t"] + b["sponge_h"] / 2),
              (b["hw"] - b["t"], b["hd"] - b["t"], b["sponge_h"] / 2), "insert")
         h = b["wall_h"]
-        for tag, off, half in (("xm", (-b["hw"], 0), (b["t"], b["hd"], h)),
-                               ("xp", (+b["hw"], 0), (b["t"], b["hd"], h)),
-                               ("ym", (0, -b["hd"]), (b["hw"], b["t"], h)),
-                               ("yp", (0, +b["hd"]), (b["hw"], b["t"], h))):
+        # hw/hd describe the OUTER box. t is full wall thickness, not a
+        # half-extent: the old construction grew every outer face by 20 mm.
+        for tag, off, half in (("xm", (-b["hw"]+b["t"]/2, 0), (b["t"]/2, b["hd"], h)),
+                               ("xp", (+b["hw"]-b["t"]/2, 0), (b["t"]/2, b["hd"], h)),
+                               ("ym", (0, -b["hd"]+b["t"]/2), (b["hw"]-b["t"], b["t"]/2, h)),
+                               ("yp", (0, +b["hd"]-b["t"]/2), (b["hw"]-b["t"], b["t"]/2, h))):
             sbox(f"{r}/w_{tag}", (BOX_X + off[0], cy + off[1], TABLE_Z + h), half, wall)
 
     # Optional explicit contact material for the bolts (see the binding below).
@@ -1261,6 +1452,9 @@ def main() -> int:
     UsdLux.DomeLight.Define(stage, "/World/dome").CreateIntensityAttr(520.0)
 
     arts = {}
+    if args.shared_stack:
+        from shared_contact import configure_materials
+        configure_materials(stage, shared_config)
     for side in MOUNT_FRAME:
         a = SingleArticulation(prim_path=f"/World/cell/{side}_arm/robot", name=f"{side}_arm")
         world.scene.add(a)
@@ -1370,6 +1564,21 @@ def main() -> int:
             top_rp = rep.create.render_product(tv, (960, 720))
             top_ann = rep.AnnotatorRegistry.get_annotator("rgb")
             top_ann.attach([top_rp])
+
+    if args.shared_stack:
+        from shared_stack import run_episode
+        exit_code = 1
+        try:
+            exit_code = run_episode(args, shared_config, sys.modules[__name__], world, rep,
+                                    arts, wrist_cams, tcp_views, bolt_views, bolt_prims,
+                                    ov_ann, MAT)
+            return exit_code
+        except BaseException:
+            import traceback
+            traceback.print_exc()
+            raise
+        finally:
+            app.close(exit_code=exit_code)
 
     class Oracle:
         """Scripted pick-and-place from privileged state, emitting the SAME chunk format.
@@ -1912,7 +2121,8 @@ def main() -> int:
         for (color, x, y, yaw), path in zip(poses, bolt_prims):
             v = bolt_views[path]
             qz = np.array([math.cos(yaw / 2), 0.0, 0.0, math.sin(yaw / 2)])
-            v.set_world_poses(np.array([[x, y, TABLE_Z + SHAFT_R + 0.002]]), np.array([qz]))
+            start_z = PICK_SURFACE_Z + (HEAD_R + 0.001 if 'size_m' in WORK_SURFACE else SHAFT_R + 0.002)
+            v.set_world_poses(np.array([[x, y, start_z]]), np.array([qz]))
             v.set_velocities(np.zeros((1, 6)))
         for i, path in enumerate(bolt_prims):
             UsdShade.MaterialBindingAPI(stage.GetPrimAtPath(path + "/shaft")).Bind(
@@ -1975,7 +2185,7 @@ def main() -> int:
         if args.dump_scene_states:
             P, Q = bolt_all_poses()
             _DUMP[str(ep_seed)] = dict(
-                layout=args.layout, colors=colors,
+                layout=args.layout, colors=colors, work_surface=WORK_SURFACE,
                 bolts=[dict(p=[float(x) for x in P[i]], q=[float(x) for x in Q[i]])
                        for i in range(len(bolt_prims))])
             print(f"  [freeze] seed {ep_seed}: captured {len(bolt_prims)} bolt poses")
@@ -1995,7 +2205,13 @@ def main() -> int:
         followers, cmd_hist, grip_cmd, q_cmd = {}, {}, {}, {}
         q_hist = {}
         smds = {}
-        _sent_q = {}      # what actually reached the drives this substep, per arm
+        _sent_q = {}
+        plan_gate = {s_: 1.0 for s_ in MOUNT_FRAME}     # safety.plan_gate, per arm
+        plan_clock = {s_: 0.0 for s_ in MOUNT_FRAME}    # fractional chunk index, paced by it
+        plan_shift = {s_: np.zeros(3) for s_ in MOUNT_FRAME}   # contact hold-back
+        proj_run = {s_: 0 for s_ in MOUNT_FRAME}
+        stall_run = {s_: 0 for s_ in MOUNT_FRAME}   # consecutive substeps of shortfall        # consecutive projection violations
+        proj_fault = {s_: 0 for s_ in MOUNT_FRAME}      # what actually reached the drives this substep, per arm
         for side in MOUNT_FRAME:
             if ORACLE_RETURN and side in _RET_Q:
                 q_cmd[side] = _RET_Q[side].copy()
@@ -2010,6 +2226,8 @@ def main() -> int:
             p, R = tcp_pose(side)
             pose6 = np.concatenate([p, mat_to_rotvec(R)])
             followers[side] = RuckigArmFollower(pose6)
+            plan_gate[side], plan_clock[side] = 1.0, 0.0
+            plan_shift[side], proj_run[side], stall_run[side] = np.zeros(3), 0, 0
             smds[side] = (FollowerOutputSmd(SMD_NF_LIN, SMD_NF_ANG, SMD_ZETA, SMD_FF,
                                             SMD_FF_LPF) if OUTPUT_SMD else None)
             if smds[side] is not None:
@@ -2054,7 +2272,7 @@ def main() -> int:
         # carry", and the two rank the arms differently (up to 5 places apart on the current
         # board). Track the lift directly off bolt height so the pick stage can be read alone;
         # a bolt above LIFT_Z was carried, whatever the close-event detector thought.
-        LIFT_Z = TABLE_Z + 0.060      # 60 mm ABOVE THE TABLE, wherever the table is
+        LIFT_Z = PICK_SURFACE_Z + 0.060
         bolt_max_z = np.zeros(len(bolt_prims))
         smin_log = []
         held_last = {}   # bolt path -> most recent (arm, grasp tick)
@@ -2259,6 +2477,7 @@ def main() -> int:
                 for side in ("left", "right"):
                     p_a, R_a, _, _ = fk_chain(q_cmd[side], T_mount[side])
                     anchor_pose = np.concatenate([p_a, mat_to_rotvec(R_a)])
+                    plan_clock[side] = 0.0        # new chunk, plan clock restarts with it
                     if VELPROPRIO_ANCHOR_OVERWRITE:
                         # historical behaviour: the anchor lands in the velproprio history
                         cmd_hist[side][-1] = anchor_pose
@@ -2326,7 +2545,16 @@ def main() -> int:
                                      'gray' if _s == 'left' else 'black']])))))
             for side in ("left", "right"):
                 ks = knots[side]
-                k = min(chunk_idx + 1, len(ks) - 1)          # knot for this policy step
+                # PLAN CLOCK, per arm. `chunk_idx` still counts policy ticks (it drives the
+                # replan boundary, which is a wall-clock event), but WHICH KNOT this arm is
+                # aiming at now advances at the rate the plan gate allows. While an arm is
+                # obstructed its chunk stops flowing, so the command cannot outrun it -- and
+                # the two arms pace independently, as two per-arm followers do on the robot.
+                if PLAN_GATE_ENABLE:
+                    plan_clock[side] += plan_gate[side]
+                    k = min(int(plan_clock[side]) + 1, len(ks) - 1)
+                else:
+                    k = min(chunk_idx + 1, len(ks) - 1)      # knot for this policy step
                 new_pose = ks[k]
                 # central difference over the reserve lookahead -> target velocity
                 lo = max(0, k - 1)
@@ -2446,7 +2674,7 @@ def main() -> int:
                               # above where the command wanted it (fingers resting on a
                               # neighbour or the pile). Either way the jaws close higher than
                               # intended, and dz alone cannot tell WHY.
-                              bolt_elev_mm=float((bp[2] - (TABLE_Z + 0.0091)) * 1e3),
+                              bolt_elev_mm=float((bp[2] - (PICK_SURFACE_Z + 0.0091)) * 1e3),
                               z_cmd_gap_mm=float((p_t[2] - fk_chain(
                                   q_cmd[side], T_mount[side])[0][2]) * 1e3),
                               neighbors_in_jaw=int(sum(
@@ -2620,11 +2848,67 @@ def main() -> int:
                     ref = (smds[side].step(ref_pre, followers[side].reference_velocity,
                                            PHYSICS_DT)
                            if smds[side] is not None else ref_pre)
+                    # OBSTRUCTION PROJECTION. Everything downstream of here sees the clamped
+                    # command; `removed` is what the box or the shell took away this tick.
+                    _p_req = ref[:3] - plan_shift[side]
+                    _p_fin, _removed = project_command(_p_req, T_mount[side][:3, 3])
+                    ref = np.concatenate([_p_fin, ref[3:]])
+                    # LEAD CLAMP. Scale the plan-ahead-of-robot offset back to max_lead, the
+                    # way scaleLinearTo does. Applied to the pose the IK will chase, so the
+                    # joint command -- and therefore FK(q_cmd), the chunk anchor -- inherits
+                    # the bound and the anchor cannot walk away from the arm.
+                    if LEAD_CLAMP_ENABLE:
+                        _act_p, _act_R = tcp_pose(side)
+                        _lead = ref[:3] - _act_p
+                        _ln = float(np.linalg.norm(_lead))
+                        if _ln > MAX_LEAD_M:
+                            ref = np.concatenate([_act_p + _lead * (MAX_LEAD_M / _ln),
+                                                  ref[3:]])
+                        _lr = mat_to_rotvec(rotvec_to_mat(ref[3:]) @ _act_R.T)
+                        _rn = float(np.linalg.norm(_lr))
+                        if _rn > MAX_LEAD_RAD:
+                            ref = np.concatenate([
+                                ref[:3],
+                                mat_to_rotvec(rotvec_to_mat(_lr * (MAX_LEAD_RAD / _rn))
+                                              @ _act_R)])
+                    # CONTACT HOLD-BACK. Accumulate the blocked component so the plan stops
+                    # advancing into the face instead of winding up against it. Bounded to one
+                    # segment of travel at the linear limit, as the C++ does: a larger removal
+                    # encodes stale lag, not fresh contact.
+                    if HOLDBACK_ENABLE and PLAN_GATE_SOURCE == "contact":
+                        # Into-contact direction from the tracking error: where the command is
+                        # and where the tool actually is. Same role as the F/T triad's contact
+                        # normal on the robot. Scaled by its OWN persistence, not by the plan
+                        # gate -- tying it to (1 - gate) meant PLAN_GATE_ENABLE=0 silently
+                        # disabled the hold-back too, and the A/B that was supposed to isolate
+                        # the gate measured neither layer (2026-09-05).
+                        _err_v = ref[:3] - tcp_pose(side)[0]
+                        _en = float(np.linalg.norm(_err_v))
+                        if _en > 0.002 and stall_run[side] >= PLAN_GATE_PERSIST:
+                            _cap = LIN_V * PHYSICS_DT
+                            plan_shift[side] = plan_shift[side] + _err_v * min(1.0, _cap / _en)
+                        else:
+                            plan_shift[side] *= 0.999
+                    elif HOLDBACK_ENABLE:
+                        _n = float(np.linalg.norm(_removed))
+                        if _n > 1e-12:
+                            _cap = LIN_V * POLICY_DT
+                            plan_shift[side] = plan_shift[side] + (
+                                _removed * (_cap / _n) if _n > _cap else _removed)
+                        else:
+                            plan_shift[side] *= 0.999   # bleed off once the face releases
                     qc = q_cmd[side]
                     p_fk, R_fk, _, _ = fk_chain(qc, T_mount[side])
                     err = np.concatenate([ref[:3] - p_fk,
                                           mat_to_rotvec(rotvec_to_mat(ref[3:]) @ R_fk.T)])
+                    # IK BUDGET. `ik.timeout_ms: 20.0` on the robot bounds the solve; this rig
+                    # had no bound, so once the command ran away from the arm every substep
+                    # spent all 100 SVD iterations and a 30 s episode took over 10 minutes
+                    # (measured 2026-09-05 with the guards off). Iterations are the portable
+                    # form of that timeout -- a wall-clock one would make runs nondeterministic.
                     _n_it = IK_MAX_ITERS if IK_MODE == "real" else IK_ITERS
+                    if IK_MODE == "real" and np.linalg.norm(err[:3]) > IK_FAR_M:
+                        _n_it = IK_FAR_ITERS
                     for _it in range(_n_it):
                         J = jacobian(qc, T_mount[side])
                         if IK_MODE == "real":
@@ -2647,6 +2931,58 @@ def main() -> int:
                                 and np.linalg.norm(err[:3]) < IK_POS_TOL
                                 and np.linalg.norm(err[3:]) < IK_ORI_TOL):
                             break
+                    # PLAN GATE. requested = the IK solution as it stands, final = the same
+                    # after the obstruction projection above already shrank the target it was
+                    # solving toward. On the robot these are two commands; here the projection
+                    # is the only thing that can separate them, which is the point -- a free
+                    # arm leaves the gate at 1 and only an obstruction closes it.
+                    # stall_run is maintained WHETHER OR NOT the gate is enabled: the
+                    # hold-back reads it too, and the whole point of the knob is to A/B one
+                    # layer at a time.
+                    if PLAN_GATE_SOURCE == "contact":
+                        _qa0 = np.asarray(
+                            arts[side].get_joint_positions()).reshape(-1)[_ARM_IDX[side]]
+                        _hq0 = q_hist[side]
+                        _L0 = PLAN_GATE_LAG_SUBSTEPS
+                        _r0 = _hq0[max(0, len(_hq0) - _L0)] if _hq0 else qc
+                        _p0 = (_hq0[max(0, len(_hq0) - _L0 - 1)]
+                               if len(_hq0) > _L0 else _r0)
+                        stall_run[side] = (stall_run[side] + 1
+                                           if plan_gate_ratio(_r0, _qa0, _p0) < PLAN_GATE_ENGAGE
+                                           else 0)
+                    if PLAN_GATE_ENABLE:
+                        if PLAN_GATE_SOURCE == "contact":
+                            _qa = np.asarray(
+                                arts[side].get_joint_positions()).reshape(-1)[_ARM_IDX[side]]
+                            _hq = q_hist[side]
+                            _L = PLAN_GATE_LAG_SUBSTEPS
+                            # requested/prev are the command the drive is chasing NOW, i.e.
+                            # one drive lag back; realized is what the joints did.
+                            _req = _hq[max(0, len(_hq) - _L)] if _hq else qc
+                            _prv = _hq[max(0, len(_hq) - _L - 1)] if len(_hq) > _L else _req
+                            plan_gate[side] = plan_gate_step(
+                                plan_gate[side], _req, _qa, _prv,
+                                persist_ok=stall_run[side] >= PLAN_GATE_PERSIST)
+                        else:
+                            _q_free = qc + (
+                                np.zeros(6) if np.linalg.norm(_removed) < 1e-12
+                                else jacobian(qc, T_mount[side]).T @ np.linalg.solve(
+                                    jacobian(qc, T_mount[side])
+                                    @ jacobian(qc, T_mount[side]).T
+                                    + IK_DAMPING * IK_DAMPING * np.eye(6),
+                                    np.concatenate([_removed, np.zeros(3)])))
+                            plan_gate[side] = plan_gate_step(plan_gate[side], _q_free, qc,
+                                                             q_cmd[side])
+                    # PROJECTION-ERROR FAULT. How far the realized command is from the knot
+                    # the follower was aiming at. The robot latches infeasible_fault after
+                    # PROJ_ERR_N consecutive violations; this rig used to diverge in silence.
+                    _perr = float(np.linalg.norm(ref[:3] - fk_chain(qc, T_mount[side])[0]))
+                    if _perr > PROJ_ERR_M:
+                        proj_run[side] += 1
+                        if proj_run[side] == PROJ_ERR_N:
+                            proj_fault[side] += 1
+                    else:
+                        proj_run[side] = 0
                     q_cmd[side] = qc
                     if _REP is not None:
                         gi = min(sub_i, len(_REP[f"{side}_q"]) - 1)
@@ -2663,7 +2999,7 @@ def main() -> int:
                     # (the host anchors on what it sent, not on what the box has replayed yet).
                     qh = q_hist[side]
                     qh.append(q_cmd[side].copy())
-                    if len(qh) > BOX_DELAY_TICKS + 2:
+                    if len(qh) > max(BOX_DELAY_TICKS, PLAN_GATE_LAG_SUBSTEPS) + 3:
                         qh.pop(0)
                     q_apply = qh[max(0, len(qh) - 1 - BOX_DELAY_TICKS)]
                     set_arm(side, q_apply, g_apply)
@@ -2731,7 +3067,8 @@ def main() -> int:
                     cmd = cmd_hist[side][-1][:3]
                     dbg.append(f"{side[0]}: cmd=({cmd[0]:+.3f},{cmd[1]:+.3f},{cmd[2]:+.3f}) "
                                f"track_err={np.linalg.norm(ref - p_ph)*1000:5.1f}mm "
-                               f"grip={grip_cmd[side]:5.1f}")
+                               f"grip={grip_cmd[side]:5.1f} gate={plan_gate[side]:4.2f} "
+                               f"hold={np.linalg.norm(plan_shift[side])*1e3:4.0f}mm")
                 print(f"  t{tick:04d} " + " | ".join(dbg))
 
             # The WRIST cameras are replicator render products too: their annotators only fill

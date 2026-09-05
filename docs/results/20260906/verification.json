@@ -1,0 +1,59 @@
+{
+  "pairs": {
+    "8001_vs_8002": {
+      "settings": true,
+      "source_configs": true,
+      "contact_model": true,
+      "scene_configuration_identical": true,
+      "initial_bolt_position_max_difference_mm": 0.0,
+      "initial_bolt_angle_max_difference_deg": 2.4148365394514667e-06,
+      "initial_arm_max_difference_deg": 0.0,
+      "wrist_rgb_mae": {
+        "left": 0.5377669270833333,
+        "right": 0.4550857204861111
+      }
+    },
+    "8001_vs_8003": {
+      "settings": true,
+      "source_configs": true,
+      "contact_model": true,
+      "scene_configuration_identical": true,
+      "initial_bolt_position_max_difference_mm": 0.0,
+      "initial_bolt_angle_max_difference_deg": 2.4148365394514667e-06,
+      "initial_arm_max_difference_deg": 0.0,
+      "wrist_rgb_mae": {
+        "left": 0.5453602430555555,
+        "right": 0.46207356770833335
+      }
+    },
+    "8002_vs_8003": {
+      "settings": true,
+      "source_configs": true,
+      "contact_model": true,
+      "scene_configuration_identical": true,
+      "initial_bolt_position_max_difference_mm": 0.0,
+      "initial_bolt_angle_max_difference_deg": 2.4148365394514667e-06,
+      "initial_arm_max_difference_deg": 0.0,
+      "wrist_rgb_mae": {
+        "left": 0.5189973958333334,
+        "right": 0.44679253472222225
+      }
+    }
+  },
+  "current_sources_unchanged": true,
+  "current_assets_unchanged": true,
+  "comparison_probe": {
+    "programs": [],
+    "streams": [
+      {
+        "width": 1920,
+        "height": 550,
+        "r_frame_rate": "30/1",
+        "nb_read_frames": "918"
+      }
+    ],
+    "format": {
+      "duration": "30.600000"
+    }
+  }
+}
