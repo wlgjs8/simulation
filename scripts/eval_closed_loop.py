@@ -1540,8 +1540,8 @@ def main() -> int:
                            orientation=np.array([0.0, 0.0, 0.0, 1.0]),  # 180 deg roll
                            camera_axes="ros")
         cam.prim.GetAttribute("focalLength").Set(11.0)
-        cam.prim.GetAttribute("horizontalAperture").Set(20.955)
-        cam.prim.GetAttribute("verticalAperture").Set(20.955 * 480 / 640)
+        cam.prim.GetAttribute("horizontalAperture").Set(17.8885)
+        cam.prim.GetAttribute("verticalAperture").Set(13.4524)
         cam.prim.GetAttribute("clippingRange").Set(Gf.Vec2f(0.004, 100.0))
         wrist_cams[side] = cam
 

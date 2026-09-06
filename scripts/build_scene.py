@@ -407,8 +407,8 @@ def main() -> int:
             # optics set on the USD prim directly: the helper setters apply a stage-unit
             # conversion that muddies the 87 deg D405 FOV we want
             cam.prim.GetAttribute("focalLength").Set(11.0)
-            cam.prim.GetAttribute("horizontalAperture").Set(20.955)
-            cam.prim.GetAttribute("verticalAperture").Set(20.955 * 480 / 640)
+            cam.prim.GetAttribute("horizontalAperture").Set(17.8885)
+            cam.prim.GetAttribute("verticalAperture").Set(13.4524)
             cam.prim.GetAttribute("clippingRange").Set(Gf.Vec2f(0.004, 100.0))
             wrist_cams[side] = cam
             print(f"  {side:5s} D405 camera at {cam.prim_path}")

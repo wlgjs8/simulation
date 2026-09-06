@@ -29,8 +29,12 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # (forward x up) = z_hat x y_hat = -x_tool, so camera-left is +x_tool: the colour imager
 # is the one at x = +9.17 mm.
 LENS_XYZ = (+0.00917, 0.04601, 0.1193)
-# D405: ~87 deg horizontal FOV
-FOCAL_MM, H_APERTURE = 11.0, 20.955
+# D405 optics: MEASURED, not the datasheet. The 87 deg spec gives aperture 20.955 =
+# fx 335.96 px, but the intrinsics the collected episodes actually carry
+# (observations/<side>/camera_calib/color_intrinsics, both wrists, several sessions)
+# are fx 393.32/393.78, fy 392.19/392.80 -- a 78.2 deg horizontal FOV. The policy's only
+# spatial grounding is this image, so a 17.2% projection error is an aim error.
+FOCAL_MM, H_APERTURE, V_APERTURE = 11.0, 17.8885, 13.4524
 RES = (640, 480)
 
 
@@ -38,6 +42,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--layout", choices=["aligned", "random"], default="aligned")
     ap.add_argument("--scene", default=None)
+    ap.add_argument("--h-aperture", type=float, default=H_APERTURE)
+    ap.add_argument("--v-aperture", type=float, default=V_APERTURE)
+    ap.add_argument("--tag", default="")
     args = ap.parse_args()
     scene = pathlib.Path(args.scene) if args.scene else ROOT / f"assets/scene_{args.layout}.usd"
 
@@ -93,8 +100,8 @@ def main() -> int:
         cam_path = f"/World/wrist_cam_{side}"
         cam = UsdGeom.Camera.Define(stage, cam_path)
         cam.CreateFocalLengthAttr(FOCAL_MM)
-        cam.CreateHorizontalApertureAttr(H_APERTURE)
-        cam.CreateVerticalApertureAttr(H_APERTURE * RES[1] / RES[0])
+        cam.CreateHorizontalApertureAttr(args.h_aperture)
+        cam.CreateVerticalApertureAttr(args.v_aperture)
         cam.CreateClippingRangeAttr(Gf.Vec2f(0.005, 100.0))
         M = Gf.Matrix4d()
         M.SetIdentity()
@@ -117,7 +124,7 @@ def main() -> int:
             if arr.size:
                 break
         if arr.size:
-            out = ROOT / f"outputs/wristcam_{args.layout}_{side}.png"
+            out = ROOT / f"outputs/wristcam_{args.layout}_{side}{args.tag}.png"
             Image.fromarray(arr[..., :3].astype("uint8")).save(out)
             out_paths[side] = out
             print(f"      wrote {out.name}")
