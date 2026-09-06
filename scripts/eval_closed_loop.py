@@ -150,6 +150,14 @@ RTC_INFERENCE_DELAY = 4     # = execute_steps - prefetch_at (4 - 0)
 # the way every historical number was scored.
 FINGER_TRAVEL_M = float(os.environ.get(
     "FINGER_TRAVEL_M", "0.049" if PIKA_TIP == "v15" else "0.047"))
+# D405 wrist optics. Default = the intrinsics the collected episodes carry (fx 393.55,
+# 78.2 deg horizontal); the datasheet 87 deg value every run before 2026-09-06 used is
+# H 20.955 / V 15.716 (fx 335.96). Overridable because the wrist image is the policy's only
+# spatial grounding: a 17% projection error is an experiment, and an experiment that needs a
+# source edit to run cannot be A/B'd against its own control.
+H_APERTURE = float(os.environ.get("EVAL_H_APERTURE", "17.8885"))
+V_APERTURE = float(os.environ.get("EVAL_V_APERTURE", "13.4524"))
+
 # "actual" = measured jaw (the deploy default), "command" = the value just sent (this rig's
 # historical behaviour). See the observation builder for why the difference is not cosmetic.
 GRIP_PROPRIO = os.environ.get("GRIP_PROPRIO", "command").lower()
@@ -1118,6 +1126,8 @@ def _provenance(args, server_metadata: dict | None) -> dict:
         "effective": {
             "work_surface": WORK_SURFACE,
             "pick_surface_z_m": PICK_SURFACE_Z,
+            "H_APERTURE": H_APERTURE, "V_APERTURE": V_APERTURE,
+            "fx_px": round(11.0 / H_APERTURE * 640, 2),
             "GRIP_PROPRIO": GRIP_PROPRIO, "GRIP_LEAD": GRIP_LEAD, "GRIP_BIAS": GRIP_BIAS,
             "GRIP_LAG_MS": GRIP_LAG_MS, "GRIP_FLOOR": GRIP_FLOOR,
             "STATE_MODE": STATE_MODE, "ACTION_MODE": ACTION_MODE, "IK_LAMBDA": IK_LAMBDA,
@@ -1540,8 +1550,10 @@ def main() -> int:
                            orientation=np.array([0.0, 0.0, 0.0, 1.0]),  # 180 deg roll
                            camera_axes="ros")
         cam.prim.GetAttribute("focalLength").Set(11.0)
-        cam.prim.GetAttribute("horizontalAperture").Set(17.8885)
-        cam.prim.GetAttribute("verticalAperture").Set(13.4524)
+        cam.prim.GetAttribute("horizontalAperture").Set(H_APERTURE)
+        cam.prim.GetAttribute("verticalAperture").Set(V_APERTURE)
+        print(f"  [cam] {side:5s} aperture H {H_APERTURE:.4f} V {V_APERTURE:.4f} "
+              f"-> fx {11.0 / H_APERTURE * 640:.2f} px", flush=True)
         cam.prim.GetAttribute("clippingRange").Set(Gf.Vec2f(0.004, 100.0))
         wrist_cams[side] = cam
 
