@@ -115,6 +115,15 @@ def analyze(run_dir, colors):
                 else:
                     misplaced += 1
 
+    # Close ATTEMPTS, independent of whether anything ended up between the jaws: a jaw that
+    # goes from open to closed is the policy trying, and attempts-vs-carries separates "the
+    # policy stopped trying" from "the policy still tries and now misses".
+    attempts = {}
+    for side, a in d["arms"].items():
+        g = a["gap"]
+        closing = np.flatnonzero((g[:-1] >= 40.0) & (g[1:] < 40.0))
+        attempts[side] = int(closing.size)
+
     episodes = []
     for side, a in d["arms"].items():
         tcp, gap = a["tcp"], a["gap"]
@@ -170,7 +179,7 @@ def analyze(run_dir, colors):
                     rests_in=rest_col or "table",
                     rest_correct=bool(rest_col == colors[bi]),
                 ))
-    return dict(run=run_dir.name, ticks=n, dt=round(dt, 4),
+    return dict(run=run_dir.name, ticks=n, dt=round(dt, 4), attempts=attempts,
                 placed=placed, misplaced=misplaced, episodes=episodes)
 
 
@@ -218,11 +227,12 @@ def main() -> int:
     for r, (rd, _) in zip(res, jobs):
         model = pathlib.Path(rd).name.rpartition("_s")[0]
         m = per_model.setdefault(model, dict(
-            runs=0, placed=0, misplaced=0, episodes=0, own_color=0, lifted=0,
+            runs=0, placed=0, misplaced=0, episodes=0, own_color=0, lifted=0, attempts=0,
             released=0, slipped=0, released_over_box=0, released_off_box=0,
             slipped_after_lift=0, rest_correct=0, errors=0,
             lift_mm=[], gap_min_mm=[], carry_m=[], end_z_mm=[], dur_s=[]))
         m["runs"] += 1
+        m["attempts"] += sum(r.get("attempts", {}).values())
         if r.get("error"):
             m["errors"] += 1
             print(f"  [error] {r['run']}: {r['error']}", file=sys.stderr)
@@ -247,7 +257,7 @@ def main() -> int:
                     m["slipped_after_lift"] += 1
             m["rest_correct"] += e["rest_correct"]
 
-    hdr = (f"{'model':<12}{'runs':>5}{'placed':>7}{'misp':>5}{'carries':>8}{'lifted':>7}"
+    hdr = (f"{'model':<12}{'runs':>5}{'placed':>7}{'misp':>5}{'closes':>8}{'carries':>8}{'lifted':>7}"
            f"{'released':>9}{'  over box':>10}{'slipped':>8}{'slip/lift':>10}"
            f"{'lift p50':>9}{'gap p50':>8}{'carry p50':>10}")
     print("\n" + hdr)
@@ -256,7 +266,7 @@ def main() -> int:
         m = per_model[model]
         p50 = lambda k: float(np.median(m[k])) if m[k] else float("nan")
         print(f"{model:<12}{m['runs']:>5}{m['placed']:>7}{m['misplaced']:>5}"
-              f"{m['episodes']:>8}{m['lifted']:>7}{m['released']:>9}"
+              f"{m['attempts']:>8}{m['episodes']:>8}{m['lifted']:>7}{m['released']:>9}"
               f"{m['released_over_box']:>10}{m['slipped']:>8}{m['slipped_after_lift']:>10}"
               f"{p50('lift_mm'):>9.1f}{p50('gap_min_mm'):>8.1f}{p50('carry_m'):>10.3f}")
 
@@ -298,6 +308,7 @@ def main() -> int:
             rel = [e for e in r["episodes"] if e["end_kind"] == "released"]
             per_seed.setdefault(seed, {})[model] = dict(
                 placed=r["placed"], carries=len(r["episodes"]),
+                closes=sum(r.get("attempts", {}).values()),
                 released=len(rel), over=sum(e["end_over_box"] for e in rel),
                 to_box=[e["to_own_box_m"] for e in rel])
         seeds = sorted(s_ for s_, v in per_seed.items() if A in v and B in v)
@@ -305,7 +316,8 @@ def main() -> int:
         print(f"  {'metric':<22}{A:>12}{B:>12}{'B-A':>8}   "
               f"{'seeds B>A / B<A':>16}   {'sign test p':>12}")
         print("  " + "-" * 86)
-        for label, key in (("placed", "placed"), ("carries", "carries"),
+        for label, key in (("placed", "placed"), ("close attempts", "closes"),
+                           ("carries", "carries"),
                            ("releases", "released"), ("releases over box", "over")):
             a = [per_seed[s_][A][key] for s_ in seeds]
             b = [per_seed[s_][B][key] for s_ in seeds]
