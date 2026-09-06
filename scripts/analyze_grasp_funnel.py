@@ -189,6 +189,8 @@ def main() -> int:
     ap.add_argument("--out", default="/tmp/grasp_funnel.json")
     ap.add_argument("--jobs", type=int, default=8)
     ap.add_argument("--models", default="", help="comma-separated filter")
+    ap.add_argument("--detail", action="store_true",
+                    help="per-arm release-site table -- where the jaw opens relative to the box")
     args = ap.parse_args()
 
     states = json.load(open(args.scene_states))
@@ -254,6 +256,30 @@ def main() -> int:
               f"{m['episodes']:>8}{m['lifted']:>7}{m['released']:>9}"
               f"{m['released_over_box']:>10}{m['slipped']:>8}{m['slipped_after_lift']:>10}"
               f"{p50('lift_mm'):>9.1f}{p50('gap_min_mm'):>8.1f}{p50('carry_m'):>10.3f}")
+
+    if args.detail:
+        # The headline table counts releases; this one says WHERE they happen, which is the
+        # number the hardware log (real_release_sites.py) reports in the same units.
+        hdr2 = (f"{'model':<12}{'arm':<7}{'carries':>8}{'released':>9}{'over box':>10}"
+                f"{'to-box p50/p90 (mm)':>22}{'lift p50':>10}{'carry p50':>11}{'hold p50':>10}")
+        print("\n" + hdr2)
+        print("-" * len(hdr2))
+        for model in sorted(per_model, key=lambda k: -per_model[k]["placed"]):
+            for side in ("left", "right"):
+                E = [e for r, (rd, _) in zip(res, jobs)
+                     if pathlib.Path(rd).name.rpartition("_s")[0] == model
+                     for e in r["episodes"] if e["side"] == side]
+                if not E:
+                    continue
+                rel = [e for e in E if e["end_kind"] == "released"]
+                tb = [e["to_own_box_m"] * 1000.0 for e in rel]
+                print(f"{model:<12}{side:<7}{len(E):>8}{len(rel):>9}"
+                      f"{sum(e['end_over_box'] for e in rel):>10}"
+                      f"{np.median(tb) if tb else float('nan'):>11.0f}/"
+                      f"{np.percentile(tb, 90) if tb else float('nan'):<10.0f}"
+                      f"{np.median([e['lift_mm'] for e in E]):>10.0f}"
+                      f"{np.median([e['carry_m'] for e in E]) * 1000:>11.0f}"
+                      f"{np.median([e['dur_s'] for e in E]):>10.1f}")
 
     for m in per_model.values():
         for k in ("lift_mm", "gap_min_mm", "carry_m", "end_z_mm", "dur_s"):
