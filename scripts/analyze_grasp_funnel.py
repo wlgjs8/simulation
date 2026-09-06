@@ -15,6 +15,7 @@ checked against the published board before any of its other numbers are believed
 """
 import argparse
 import json
+import math
 import multiprocessing as mp
 import pathlib
 import sys
@@ -189,6 +190,8 @@ def main() -> int:
     ap.add_argument("--out", default="/tmp/grasp_funnel.json")
     ap.add_argument("--jobs", type=int, default=8)
     ap.add_argument("--models", default="", help="comma-separated filter")
+    ap.add_argument("--pair", default="",
+                    help="A,B: seed-matched comparison of two conditions with a sign test")
     ap.add_argument("--detail", action="store_true",
                     help="per-arm release-site table -- where the jaw opens relative to the box")
     args = ap.parse_args()
@@ -280,6 +283,46 @@ def main() -> int:
                       f"{np.median([e['lift_mm'] for e in E]):>10.0f}"
                       f"{np.median([e['carry_m'] for e in E]) * 1000:>11.0f}"
                       f"{np.median([e['dur_s'] for e in E]):>10.1f}")
+
+    if args.pair:
+        # Run-to-run spread on this rig is large (a same-optics repeat of the 2026-09-06 board
+        # moved 5 -> 9 placements on the same 8 seeds), so conditions are compared WITHIN a
+        # seed and the verdict is how many seeds moved, not the totals.
+        A, B = args.pair.split(",")
+        per_seed = {}
+        for r, (rd, _) in zip(res, jobs):
+            name = pathlib.Path(rd).name
+            model, _, seed = name.rpartition("_s")
+            if model not in (A, B):
+                continue
+            rel = [e for e in r["episodes"] if e["end_kind"] == "released"]
+            per_seed.setdefault(seed, {})[model] = dict(
+                placed=r["placed"], carries=len(r["episodes"]),
+                released=len(rel), over=sum(e["end_over_box"] for e in rel),
+                to_box=[e["to_own_box_m"] for e in rel])
+        seeds = sorted(s_ for s_, v in per_seed.items() if A in v and B in v)
+        print(f"\n  seed-matched {A} vs {B}: {len(seeds)} seeds")
+        print(f"  {'metric':<22}{A:>12}{B:>12}{'B-A':>8}   "
+              f"{'seeds B>A / B<A':>16}   {'sign test p':>12}")
+        print("  " + "-" * 86)
+        for label, key in (("placed", "placed"), ("carries", "carries"),
+                           ("releases", "released"), ("releases over box", "over")):
+            a = [per_seed[s_][A][key] for s_ in seeds]
+            b = [per_seed[s_][B][key] for s_ in seeds]
+            up = sum(1 for x, y in zip(a, b) if y > x)
+            dn = sum(1 for x, y in zip(a, b) if y < x)
+            n = up + dn
+            # two-sided exact sign test on the seeds that moved
+            pv = (min(1.0, 2 * sum(math.comb(n, k) for k in range(min(up, dn) + 1)) / 2 ** n)
+                  if n else 1.0)
+            print(f"  {label:<22}{sum(a):>12}{sum(b):>12}{sum(b) - sum(a):>8}   "
+                  f"{up:>7} / {dn:<6}   {pv:>12.3f}")
+        for label, model in ((A, A), (B, B)):
+            d = [x * 1000 for s_ in seeds for x in per_seed[s_][model]["to_box"]]
+            if d:
+                print(f"  {label} release->box: p50 {np.median(d):.0f} mm, "
+                      f"p90 {np.percentile(d, 90):.0f} mm, over box "
+                      f"{sum(1 for x in d if x <= 0)}/{len(d)}")
 
     for m in per_model.values():
         for k in ("lift_mm", "gap_min_mm", "carry_m", "end_z_mm", "dur_s"):
