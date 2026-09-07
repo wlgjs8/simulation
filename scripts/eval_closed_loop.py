@@ -157,6 +157,27 @@ FINGER_TRAVEL_M = float(os.environ.get(
 # source edit to run cannot be A/B'd against its own control.
 H_APERTURE = float(os.environ.get("EVAL_H_APERTURE", "17.8885"))
 V_APERTURE = float(os.environ.get("EVAL_V_APERTURE", "13.4524"))
+# Principal point, in PIXELS from the 640x480 centre, per arm ("dx,dy", +x right, +y down).
+# Default 0,0 = the K-normalised virtual camera (fx=fy=393, pp=320/240). The units the
+# checkpoints were TRAINED on are not centred -- collection left (319.08, 229.52) and right
+# (316.93, 238.20), i.e. (-0.9, -10.5) px and (-3.1, -1.8) px -- and the pipeline neither
+# undistorts nor aligns pp, so rendering a centred camera is itself a distribution shift.
+# 10 px at 200 mm is ~5 mm of aim error against a grasp that succeeds at |dxy| p50 8.9 mm.
+PP_PX = {side: tuple(float(v) for v in
+                     os.environ.get(f"EVAL_PP_{side.upper()}", "0,0").split(","))
+         for side in ("left", "right")}
+MEASURED_OPTICS = (17.8885, 13.4524)
+if (H_APERTURE, V_APERTURE) != MEASURED_OPTICS:
+    # Scoring standard (2026-09-07): every bolt_v2 / data_v2 checkpoint is scored at the
+    # measured optics. An override is legitimate for a stated A/B and illegitimate as a board,
+    # so it says so on its way past rather than hiding in a settings dump.
+    print("=" * 78 + "\n"
+          f"  WARNING: wrist optics overridden to H {H_APERTURE} / V {V_APERTURE} "
+          f"(fx {11.0 / H_APERTURE * 640:.2f} px).\n"
+          f"  The scoring standard is the MEASURED {MEASURED_OPTICS[0]} / {MEASURED_OPTICS[1]} "
+          "(fx 393.55). This run is an A/B arm,\n"
+          "  not a board, and must not be compared to boards scored at the standard.\n"
+          + "=" * 78, flush=True)
 
 # "actual" = measured jaw (the deploy default), "command" = the value just sent (this rig's
 # historical behaviour). See the observation builder for why the difference is not cosmetic.
@@ -1126,7 +1147,7 @@ def _provenance(args, server_metadata: dict | None) -> dict:
         "effective": {
             "work_surface": WORK_SURFACE,
             "pick_surface_z_m": PICK_SURFACE_Z,
-            "H_APERTURE": H_APERTURE, "V_APERTURE": V_APERTURE,
+            "H_APERTURE": H_APERTURE, "V_APERTURE": V_APERTURE, "PP_PX": PP_PX,
             "fx_px": round(11.0 / H_APERTURE * 640, 2),
             "GRIP_PROPRIO": GRIP_PROPRIO, "GRIP_LEAD": GRIP_LEAD, "GRIP_BIAS": GRIP_BIAS,
             "GRIP_LAG_MS": GRIP_LAG_MS, "GRIP_FLOOR": GRIP_FLOOR,
@@ -1552,8 +1573,17 @@ def main() -> int:
         cam.prim.GetAttribute("focalLength").Set(11.0)
         cam.prim.GetAttribute("horizontalAperture").Set(H_APERTURE)
         cam.prim.GetAttribute("verticalAperture").Set(V_APERTURE)
+        ppx, ppy = PP_PX[side]
+        # Sign verified against Gf.Camera.ComputeProjectionMatrix, not guessed: the aperture
+        # offset moves the frustum window, so the optical axis lands on the OPPOSITE side of
+        # the frame. With these two negations, EVAL_PP_* = (+40, +40) puts the principal
+        # point at pixel (360, 280), i.e. right and down, matching the +x-right/+y-down
+        # convention the collected intrinsics are quoted in.
+        cam.prim.GetAttribute("horizontalApertureOffset").Set(-ppx / 640.0 * H_APERTURE)
+        cam.prim.GetAttribute("verticalApertureOffset").Set(ppy / 480.0 * V_APERTURE)
         print(f"  [cam] {side:5s} aperture H {H_APERTURE:.4f} V {V_APERTURE:.4f} "
-              f"-> fx {11.0 / H_APERTURE * 640:.2f} px", flush=True)
+              f"-> fx {11.0 / H_APERTURE * 640:.2f} px | pp offset {ppx:+.2f},{ppy:+.2f} px",
+              flush=True)
         cam.prim.GetAttribute("clippingRange").Set(Gf.Vec2f(0.004, 100.0))
         wrist_cams[side] = cam
 

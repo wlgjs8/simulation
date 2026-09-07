@@ -45,6 +45,10 @@ def main() -> int:
     ap.add_argument("--h-aperture", type=float, default=H_APERTURE)
     ap.add_argument("--v-aperture", type=float, default=V_APERTURE)
     ap.add_argument("--tag", default="")
+    # principal point in PIXELS from the 640x480 centre (+x right, +y down), same convention
+    # as eval_closed_loop.py's EVAL_PP_LEFT/RIGHT -- this is where that sign gets verified
+    ap.add_argument("--pp-x", type=float, default=0.0)
+    ap.add_argument("--pp-y", type=float, default=0.0)
     args = ap.parse_args()
     scene = pathlib.Path(args.scene) if args.scene else ROOT / f"assets/scene_{args.layout}.usd"
 
@@ -102,6 +106,8 @@ def main() -> int:
         cam.CreateFocalLengthAttr(FOCAL_MM)
         cam.CreateHorizontalApertureAttr(args.h_aperture)
         cam.CreateVerticalApertureAttr(args.v_aperture)
+        cam.CreateHorizontalApertureOffsetAttr(-args.pp_x / RES[0] * args.h_aperture)
+        cam.CreateVerticalApertureOffsetAttr(args.pp_y / RES[1] * args.v_aperture)
         cam.CreateClippingRangeAttr(Gf.Vec2f(0.005, 100.0))
         M = Gf.Matrix4d()
         M.SetIdentity()
