@@ -1,0 +1,191 @@
+{
+ "fx393_board_20260907": {
+  "griponly": {
+   "runs": 40,
+   "placed": 27,
+   "misplaced": 1,
+   "close_attempts": 139,
+   "carries": 92,
+   "lifted": 66,
+   "released": 61,
+   "released_over_box": 28,
+   "slipped": 31,
+   "arms": {
+    "left": {
+     "carries": 42,
+     "released": 19,
+     "over_box": 6,
+     "to_box_p50_mm": 186.0,
+     "lift_p50_mm": 54.0,
+     "carry_p50_mm": 12.0,
+     "hold_p50_s": 0.6
+    },
+    "right": {
+     "carries": 50,
+     "released": 42,
+     "over_box": 22,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 267.0,
+     "carry_p50_mm": 70.0,
+     "hold_p50_s": 3.5
+    }
+   }
+  },
+  "ph3_r4": {
+   "runs": 39,
+   "placed": 18,
+   "misplaced": 0,
+   "close_attempts": 214,
+   "carries": 35,
+   "lifted": 26,
+   "released": 19,
+   "released_over_box": 18,
+   "slipped": 16,
+   "arms": {
+    "left": {
+     "carries": 10,
+     "released": 2,
+     "over_box": 2,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 26.0,
+     "carry_p50_mm": 10.0,
+     "hold_p50_s": 1.1
+    },
+    "right": {
+     "carries": 25,
+     "released": 17,
+     "over_box": 16,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 366.0,
+     "carry_p50_mm": 334.0,
+     "hold_p50_s": 3.8
+    }
+   }
+  },
+  "ph3_r5": {
+   "runs": 40,
+   "placed": 20,
+   "misplaced": 0,
+   "close_attempts": 208,
+   "carries": 49,
+   "lifted": 42,
+   "released": 20,
+   "released_over_box": 17,
+   "slipped": 29,
+   "arms": {
+    "left": {
+     "carries": 5,
+     "released": 1,
+     "over_box": 1,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 210.0,
+     "carry_p50_mm": 36.0,
+     "hold_p50_s": 1.1
+    },
+    "right": {
+     "carries": 44,
+     "released": 19,
+     "over_box": 16,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 302.0,
+     "carry_p50_mm": 107.0,
+     "hold_p50_s": 3.4
+    }
+   }
+  },
+  "plain_r4": {
+   "runs": 40,
+   "placed": 22,
+   "misplaced": 0,
+   "close_attempts": 206,
+   "carries": 59,
+   "lifted": 52,
+   "released": 21,
+   "released_over_box": 20,
+   "slipped": 38,
+   "arms": {
+    "left": {
+     "carries": 15,
+     "released": 3,
+     "over_box": 2,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 186.0,
+     "carry_p50_mm": 41.0,
+     "hold_p50_s": 0.9
+    },
+    "right": {
+     "carries": 44,
+     "released": 18,
+     "over_box": 18,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 370.0,
+     "carry_p50_mm": 162.0,
+     "hold_p50_s": 3.4
+    }
+   }
+  },
+  "plain_r5": {
+   "runs": 39,
+   "placed": 17,
+   "misplaced": 0,
+   "close_attempts": 162,
+   "carries": 35,
+   "lifted": 30,
+   "released": 17,
+   "released_over_box": 14,
+   "slipped": 18,
+   "arms": {
+    "left": {
+     "carries": 8,
+     "released": 1,
+     "over_box": 0,
+     "to_box_p50_mm": 173.0,
+     "lift_p50_mm": 84.0,
+     "carry_p50_mm": 22.0,
+     "hold_p50_s": 0.8
+    },
+    "right": {
+     "carries": 27,
+     "released": 16,
+     "over_box": 14,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 381.0,
+     "carry_p50_mm": 300.0,
+     "hold_p50_s": 4.3
+    }
+   }
+  },
+  "veldrop50": {
+   "runs": 40,
+   "placed": 29,
+   "misplaced": 1,
+   "close_attempts": 200,
+   "carries": 65,
+   "lifted": 53,
+   "released": 36,
+   "released_over_box": 28,
+   "slipped": 29,
+   "arms": {
+    "left": {
+     "carries": 26,
+     "released": 8,
+     "over_box": 4,
+     "to_box_p50_mm": 47.0,
+     "lift_p50_mm": 213.0,
+     "carry_p50_mm": 22.0,
+     "hold_p50_s": 1.9
+    },
+    "right": {
+     "carries": 39,
+     "released": 28,
+     "over_box": 24,
+     "to_box_p50_mm": 0.0,
+     "lift_p50_mm": 343.0,
+     "carry_p50_mm": 293.0,
+     "hold_p50_s": 4.0
+    }
+   }
+  }
+ },
+ "note": "Both boards recomputed by scripts/analyze_grasp_funnel.py from diag/poses.jsonl; placement uses the rig's own criterion. 12 concurrent (one server per model, two episodes each) on both boards -- aperture is the only intended difference."
+}
