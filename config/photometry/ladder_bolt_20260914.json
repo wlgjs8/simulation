@@ -1,0 +1,21 @@
+{
+  "every_sec": 1.0,
+  "about": "Bolt-appearance separation check before the board: A, D and the two single-material swaps E, F. No exposure matching -- every column is exactly the preset the board will run.",
+  "variants": [
+    {
+      "label": "A_stock"
+    },
+    {
+      "label": "D_fit",
+      "preset": "config/photometry/cell_fit_20260912_t013.json"
+    },
+    {
+      "label": "E_fit_stockbolt",
+      "preset": "config/photometry/sep_E_fit_stock_boltgray_20260914.json"
+    },
+    {
+      "label": "F_stock_fitbolt",
+      "preset": "config/photometry/sep_F_stock_fit_boltgray_20260914.json"
+    }
+  ]
+}

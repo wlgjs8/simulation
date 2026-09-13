@@ -1,0 +1,9 @@
+sb2  A  n=  8916  p50   70.6 ms  p90   78.3 ms  p99  113.2 ms
+sb2  D  n=  8847  p50   71.1 ms  p90   90.0 ms  p99  121.7 ms
+sb2  E  n=  8906  p50   71.3 ms  p90   90.1 ms  p99  115.1 ms
+sb2  F  n=  8899  p50   71.8 ms  p90   90.9 ms  p99  118.7 ms
+sb2  G  n=  8902  p50   71.7 ms  p90   90.9 ms  p99  116.3 ms
+pb   A  n=  8908  p50   70.2 ms  p90   77.8 ms  p99  115.0 ms
+pb   B  n=  8863  p50   73.9 ms  p90   95.9 ms  p99  126.6 ms
+pb   C  n=  8862  p50   73.4 ms  p90   95.7 ms  p99  129.3 ms
+pb   D  n=  8869  p50   73.8 ms  p90   95.5 ms  p99  125.7 ms

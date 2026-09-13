@@ -1,0 +1,7 @@
+{"real_root": "/home/plaif/workspace/robotics_lab/logs/flow_obs_am",
+ "ladder_root": "outputs/photometry_ladder_20260914",
+ "variants": ["D_fit", "G_fit_iray"],
+ "rows": [
+  {"arm": "left", "phase": "① init", "real": "run_20260910_165659/0", "sim": "gcal101/s000"},
+  {"arm": "right", "phase": "① init", "real": "run_20260910_165659/0", "sim": "gcal101/s002"}
+ ]}

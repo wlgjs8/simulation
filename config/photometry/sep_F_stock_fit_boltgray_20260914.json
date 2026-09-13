@@ -1,0 +1,9 @@
+{
+  "schema": "simulation.photometry_preset.v1",
+  "status": "separation condition for the 2026-09-14 bolt-appearance board; not a scoring standard",
+  "name": "sep_F_stock_fit_boltgray_20260914",
+  "about": "stock rig (A) with ONLY the gray bolt material taken from t013: bolt_gray.rgb=0.600,0.610,0.630;bolt_gray.metallic=0.139;bolt_gray.rough=0.848",
+  "env": {
+    "EVAL_MAT": "bolt_gray.rgb=0.600,0.610,0.630;bolt_gray.metallic=0.139;bolt_gray.rough=0.848"
+  }
+}

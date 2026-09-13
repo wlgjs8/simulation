@@ -1,0 +1,17 @@
+{
+  "schema": "simulation.photometry_preset.v1",
+  "status": "separation condition for the 2026-09-14 bolt-appearance board; not a scoring standard",
+  "name": "sep_E_fit_stock_boltgray_20260914",
+  "about": "t013 (D) with ONLY the gray bolt material returned to stock (rgb 0.52/0.53/0.56, rough 0.32, metallic 1.0)",
+  "env": {
+    "EVAL_RTX": "/rtx/post/tonemap/op=0",
+    "EVAL_MAT": "table.metallic=0;riser.metallic=0;boxgray.metallic=0;table.rgb=0.107,0.117,0.122;boxgray.rgb=0.075,0.085,0.105;insert.rgb=0.060,0.060,0.080;green.rgb=0.100,0.380,0.270;bolt_black.metallic=0.236",
+    "EVAL_KEY_INTENSITY": "0.9556",
+    "EVAL_KEY_ANGLE": "33.70",
+    "EVAL_DOME_INTENSITY": "2.7774",
+    "EVAL_SUN_INTENSITY": "2.6854",
+    "EVAL_SUN_ANGLE": "2.04",
+    "EVAL_SUN_AZIMUTH": "332.4",
+    "EVAL_SUN_ELEVATION": "29.8"
+  }
+}

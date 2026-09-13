@@ -11,6 +11,7 @@ pixels); those rows are also emitted enlarged into a second "_crops" image.
 Picks (JSON):
   {"real_root": ".../robotics_lab/logs/flow_obs_am",
    "ladder_root": ".../ladder",
+   "variants": ["A_stock", ...],   # optional, default A-D
    "rows": [{"arm": "left", "phase": "init", "real": "run_20260910_165659/0", "sim": "s100/s000"}, ...]}
 "real" is <run dir>/<index into that run's sorted *_<arm>.jpg list>.
 
@@ -82,11 +83,12 @@ def montage(picks_path, out_path, w=480, h=360, crops_only=False, sat_overlay=Fa
     if not rows:
         return None
     cw, ch = (w, h) if not crops_only else (480, 336)   # crop boxes are 320x224
+    order = picks.get("variants", ORDER)
     head = 34
-    sheet = Image.new("RGB", (5 * cw, head + len(rows) * (ch + 22)), (24, 24, 24))
+    sheet = Image.new("RGB", ((1 + len(order)) * cw, head + len(rows) * (ch + 22)), (24, 24, 24))
     d = ImageDraw.Draw(sheet)
-    for c, key in enumerate(["real", *ORDER]):
-        d.text((c * cw + 8, 7), TITLES[key], font=font(20), fill=(235, 235, 235))
+    for c, key in enumerate(["real", *order]):
+        d.text((c * cw + 8, 7), TITLES.get(key, key), font=font(20), fill=(235, 235, 235))
     for r, row in enumerate(rows):
         y0 = head + r * (ch + 22)
         arm = row["arm"]
@@ -103,7 +105,7 @@ def montage(picks_path, out_path, w=480, h=360, crops_only=False, sat_overlay=Fa
         crop_r = row.get("real_crop") if crops_only else None
         crop_s = row.get("sim_crop") if crops_only else None
         sheet.paste(panel(real, "실기", "", cw, ch, crop_r, sat_overlay), (0, y0 + 22))
-        for c, lab in enumerate(ORDER, start=1):
+        for c, lab in enumerate(order, start=1):
             img = Image.open(snap / f"{lab}_{arm}.png").convert("RGB")
             sheet.paste(panel(img, lab, "", cw, ch, crop_s, sat_overlay), (c * cw, y0 + 22))
     sheet.save(out_path, quality=92)
