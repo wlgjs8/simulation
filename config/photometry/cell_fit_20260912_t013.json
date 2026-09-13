@@ -1,0 +1,74 @@
+{
+  "schema": "simulation.photometry_preset.v1",
+  "name": "cell_fit_20260912_t013",
+  "status": "candidate -- not the scoring default; boards under it are not comparable to stock boards",
+  "fit": {
+    "round": 5,
+    "trial": "t013",
+    "score": 20.953,
+    "objective": "sum over arms of the 1-Wasserstein distance between 64-bin luminance CDFs, plus 30*(log10 saturated-mass ratio)^2",
+    "reference": "robotics_lab/logs/flow_obs_am deployment snapshots, 2026-09-10/11, ~18k wrist frames",
+    "floor": "~18 (median W1 of a single deployment run to the pooled deployment histogram: left 8.7 + right 9.3)",
+    "render": "seed 100, aligned foam layout, 4 s shared-stack episode, 10 frames per arm decoded from the diagnostic mp4",
+    "result_quantiles": {
+      "left": {
+        "p10": 32,
+        "p50": 100,
+        "p90": 212,
+        "sat_pct": 1.76
+      },
+      "right": {
+        "p10": 32,
+        "p50": 96,
+        "p90": 228,
+        "sat_pct": 1.31
+      }
+    },
+    "reference_quantiles": {
+      "left": {
+        "p10": 56,
+        "p50": 104,
+        "p90": 192,
+        "sat_pct": 2.62
+      },
+      "right": {
+        "p10": 52,
+        "p50": 100,
+        "p90": 176,
+        "sat_pct": 2.08
+      }
+    },
+    "notes": [
+      "bolt_gray albedo 0.60 sits ON the upper bound of the fit's range (0.20-0.60)",
+      "sun arrives from stand-frame (+0.40, +0.77, +0.50)"
+    ]
+  },
+  "params": {
+    "key": 0.9556303681801992,
+    "key_angle": 33.701134632007275,
+    "dome": 2.777402062656656,
+    "sun": 2.6853748319143467,
+    "sun_angle": 2.0379244681643276,
+    "sun_az": 332.3921392847929,
+    "sun_el": 29.799476682295143,
+    "table_alb": 0.10738715995572964,
+    "box_alb": 0.07502726232493129,
+    "insert_alb": 0.05964925895497569,
+    "green_scale": 1.0,
+    "bg_alb": 0.6,
+    "bg_metal": 0.13855548736109352,
+    "bg_rough": 0.8481337425890288,
+    "bb_metal": 0.2356377170893708
+  },
+  "env": {
+    "EVAL_RTX": "/rtx/post/tonemap/op=0",
+    "EVAL_MAT": "table.metallic=0;riser.metallic=0;boxgray.metallic=0;table.rgb=0.107,0.117,0.122;boxgray.rgb=0.075,0.085,0.105;insert.rgb=0.060,0.060,0.080;green.rgb=0.100,0.380,0.270;bolt_gray.rgb=0.600,0.610,0.630;bolt_gray.metallic=0.139;bolt_gray.rough=0.848;bolt_black.metallic=0.236",
+    "EVAL_KEY_INTENSITY": "0.9556",
+    "EVAL_KEY_ANGLE": "33.70",
+    "EVAL_DOME_INTENSITY": "2.7774",
+    "EVAL_SUN_INTENSITY": "2.6854",
+    "EVAL_SUN_ANGLE": "2.04",
+    "EVAL_SUN_AZIMUTH": "332.4",
+    "EVAL_SUN_ELEVATION": "29.8"
+  }
+}

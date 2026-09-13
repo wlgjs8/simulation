@@ -166,6 +166,130 @@ V_APERTURE = float(os.environ.get("EVAL_V_APERTURE", "13.4524"))
 PP_PX = {side: tuple(float(v) for v in
                      os.environ.get(f"EVAL_PP_{side.upper()}", "0,0").split(","))
          for side in ("left", "right")}
+# --- cell photometry preset ---------------------------------------------------------
+# The lighting, camera-response and material knobs below are all plain env vars so that a sweep
+# can move any one of them. A board must not depend on a hand-typed env line, so EVAL_PHOTOMETRY
+# names a tracked JSON ({"env": {NAME: value}}) whose values become the DEFAULTS of those knobs:
+# an explicit env var still wins, which is what keeps a single-knob A/B possible on top of a
+# preset. Unset = the stock rig, bit-for-bit.
+PHOTOMETRY_PRESET = os.environ.get("EVAL_PHOTOMETRY", "").strip()
+PHOTOMETRY_PRESET_ENV = {}
+PHOTOMETRY_PRESET_SHA256 = None
+if PHOTOMETRY_PRESET:
+    _preset_path = pathlib.Path(PHOTOMETRY_PRESET)
+    if not _preset_path.is_absolute() and not _preset_path.exists():
+        _preset_path = pathlib.Path(__file__).resolve().parents[1] / _preset_path
+    import hashlib
+    PHOTOMETRY_PRESET_SHA256 = hashlib.sha256(_preset_path.read_bytes()).hexdigest()
+    PHOTOMETRY_PRESET_ENV = {k: str(v) for k, v in
+                             json.loads(_preset_path.read_text())["env"].items()}
+    for _k, _v in PHOTOMETRY_PRESET_ENV.items():
+        os.environ.setdefault(_k, _v)
+    PHOTOMETRY_PRESET = str(_preset_path.resolve())
+
+# --- cell lighting ------------------------------------------------------------------
+# The real cell has a large window behind the work area and direct sun comes through it; on the
+# robot the fingertips and parts of the boxes rail at 255. The stock rig -- a soft key (600,
+# 12 deg) plus a dome (520) and no sun -- produced essentially no saturation. Light level alone
+# was not the reason (see camera response below), but the window is a real hard directional
+# source, so it gets its own light. EVAL_SUN_INTENSITY=0 creates no sun prim at all.
+KEY_INTENSITY = float(os.environ.get("EVAL_KEY_INTENSITY", "600"))
+KEY_ANGLE = float(os.environ.get("EVAL_KEY_ANGLE", "12"))
+DOME_INTENSITY = float(os.environ.get("EVAL_DOME_INTENSITY", "520"))
+SUN_INTENSITY = float(os.environ.get("EVAL_SUN_INTENSITY", "0"))
+SUN_ANGLE = float(os.environ.get("EVAL_SUN_ANGLE", "1.5"))        # small angular size = hard sun
+# Direction: the prim gets rotateXYZ(elevation - 90, 0, azimuth) and a DistantLight shines along
+# its local -Z, so at azimuth 0 the light ARRIVES FROM +y (stand frame) at the given elevation, and
+# +azimuth swings that source counter-clockwise about +z (azimuth -90 = from +x, the far side of
+# the table). Checked by hand against USD's rotateXYZ order (X first, then Z).
+SUN_AZIMUTH = float(os.environ.get("EVAL_SUN_AZIMUTH", "0"))      # deg about +z
+SUN_ELEVATION = float(os.environ.get("EVAL_SUN_ELEVATION", "35"))  # deg above the horizon
+# There is deliberately no fingertip-finish knob. The tips live in an instanceable payload, so a
+# runtime shader override reaches nothing, and patching the asset layer showed roughness does not
+# matter: under a hard clip the tip band clipped 11.1 / 10.6 / 10.5 / 10.7 % at roughness
+# 0.03 / 0.10 / 0.25 / 0.50 (deployment 10.8 %). The TPU albedo (0.896, 0.791, 0) is the brightest
+# diffuse surface in the scene and rails on diffuse light alone (2026-09-11 sweep).
+
+
+# --- camera response ----------------------------------------------------------------
+# Isaac renders through Kit's Iray-Reinhard tonemapper (op 6, burnHighlights 0.7, whiteScale
+# 40.2), which rolls highlights off instead of clipping them. The D405 is the opposite: its
+# auto-exposure sits pinned at the 90 fps ceiling (9947 us, gain 0, a single value across
+# 1.66 M camera-quality rows on 2026-09-10/11), so it behaves as a fixed linear gain and a hard
+# clip at 255. Across tonemap ops 1-8 the tip band clipped exactly 0.00 % at any light level;
+# only op 0 (clamp) can rail. Under op 0 the film/exposure settings (filmIso, fNumber,
+# cameraShutter, cm2Factor) had no effect, so exposure is set by the light intensities instead --
+# which is why a fitted preset carries intensities of order 1 rather than hundreds.
+# EVAL_RTX is a semicolon-separated list of carb settings applied right after the app starts:
+#   EVAL_RTX='/rtx/post/tonemap/op=0'
+# Empty keeps Kit's defaults bit-for-bit.
+RTX_SETTINGS = os.environ.get("EVAL_RTX", "").strip()
+
+
+def _apply_rtx_settings():
+    """Apply EVAL_RTX to carb. Must run after SimulationApp() and before the first render."""
+    if not RTX_SETTINGS:
+        return
+    import carb
+
+    st = carb.settings.get_settings()
+    for item in RTX_SETTINGS.split(";"):
+        item = item.strip()
+        if not item:
+            continue
+        key, _, raw = item.partition("=")
+        key, raw = key.strip(), raw.strip()
+        old = st.get(key)
+        # carb is typed: writing a float into an int setting silently does nothing, so the new
+        # value is coerced to the type already there and the result is read back and printed.
+        if isinstance(old, bool) or raw.lower() in ("true", "false"):
+            val = raw.lower() == "true"
+        elif isinstance(old, int) and not isinstance(old, bool):
+            val = int(float(raw))
+        else:
+            val = float(raw)
+        st.set(key, val)
+        got = st.get(key)
+        flag = "" if got == val else f"  !! read back {got!r}"
+        print(f"  [rtx] {key} {old!r} -> {got!r}{flag}", flush=True)
+
+
+# --- cell materials -----------------------------------------------------------------
+# The cell's surfaces were authored by eye. Two were outside anything lighting could fix: the
+# table's diffuseColor is a LINEAR albedo of 0.42 while the foam pad beside it comes from an sRGB
+# texture that lands near 0.10 linear, so any exposure that puts the pad near the deployment's
+# level railed the whole table top as one block; and the gray bolts were metallic 1.0 / rough
+# 0.32, i.e. polished chrome, where the real bolts are matte zinc. EVAL_MAT overrides any
+# (name, field) of the MAT table without touching the code:
+#   EVAL_MAT='table.metallic=0;table.rgb=0.10,0.11,0.12;bolt_gray.metallic=0.14'
+# Names: table riser green boxgray insert bolt_gray bolt_black. Fields: rgb (3 comma-separated
+# floats), rough, metallic. Empty keeps the authored values.
+_MAT_NAMES = ("table", "riser", "green", "boxgray", "insert", "bolt_gray", "bolt_black")
+_MAT_OVERRIDE = {}
+for _item in os.environ.get("EVAL_MAT", "").split(";"):
+    _item = _item.strip()
+    if not _item:
+        continue
+    _lhs, _, _rhs = _item.partition("=")
+    _name, _, _field = _lhs.strip().partition(".")
+    if _name not in _MAT_NAMES or _field not in ("rgb", "rough", "metallic"):
+        # a typo here would silently render the authored material and read as a materials result
+        raise SystemExit(f"EVAL_MAT: unknown target {_lhs.strip()!r}")
+    _MAT_OVERRIDE.setdefault(_name, {})[_field] = (
+        tuple(float(v) for v in _rhs.split(",")) if _field == "rgb" else float(_rhs))
+
+
+def photometry_metadata() -> dict:
+    """Everything that decides what the wrist cameras see, for run provenance."""
+    return {"preset": PHOTOMETRY_PRESET or None, "preset_sha256": PHOTOMETRY_PRESET_SHA256,
+            "preset_env": PHOTOMETRY_PRESET_ENV,
+            "rtx": RTX_SETTINGS,
+            "light": {"key": KEY_INTENSITY, "key_angle": KEY_ANGLE, "dome": DOME_INTENSITY,
+                      "sun": SUN_INTENSITY, "sun_angle": SUN_ANGLE,
+                      "sun_az": SUN_AZIMUTH, "sun_el": SUN_ELEVATION},
+            "material_overrides": {k: dict(v) for k, v in _MAT_OVERRIDE.items()}}
+
+
 MEASURED_OPTICS = (17.8885, 13.4524)
 if (H_APERTURE, V_APERTURE) != MEASURED_OPTICS:
     # Scoring standard (2026-09-07): every bolt_v2 / data_v2 checkpoint is scored at the
@@ -1148,6 +1272,7 @@ def _provenance(args, server_metadata: dict | None) -> dict:
             "work_surface": WORK_SURFACE,
             "pick_surface_z_m": PICK_SURFACE_Z,
             "H_APERTURE": H_APERTURE, "V_APERTURE": V_APERTURE, "PP_PX": PP_PX,
+            "PHOTOMETRY": photometry_metadata(),
             "fx_px": round(11.0 / H_APERTURE * 640, 2),
             "GRIP_PROPRIO": GRIP_PROPRIO, "GRIP_LEAD": GRIP_LEAD, "GRIP_BIAS": GRIP_BIAS,
             "GRIP_LAG_MS": GRIP_LAG_MS, "GRIP_FLOOR": GRIP_FLOOR,
@@ -1288,6 +1413,7 @@ def main() -> int:
     from isaacsim import SimulationApp
 
     app = SimulationApp({"headless": True})
+    _apply_rtx_settings()
 
     import imageio.v2 as imageio
     import omni.replicator.core as rep
@@ -1312,7 +1438,12 @@ def main() -> int:
                   rendering_dt=PHYSICS_DT)
     stage = get_current_stage()
 
-    def mat(path, rgb, rough=0.5, metallic=0.0):
+    def mat(path, rgb, rough=0.5, metallic=0.0, name=None):
+        ov = _MAT_OVERRIDE.get(name or path.rsplit("/", 1)[-1], {})
+        if ov:
+            rgb, rough, metallic = ov.get("rgb", rgb), ov.get("rough", rough), ov.get("metallic", metallic)
+            print(f"  [mat] {name}: rgb {tuple(round(c, 3) for c in rgb)} rough {rough:g} "
+                  f"metallic {metallic:g}", flush=True)
         m = UsdShade.Material.Define(stage, path)
         sh = UsdShade.Shader.Define(stage, path + "/S")
         sh.CreateIdAttr("UsdPreviewSurface")
@@ -1323,13 +1454,13 @@ def main() -> int:
         return m
 
     MAT = {
-        "table": mat("/World/m/table", (0.42, 0.44, 0.45), 0.42, 0.65),
-        "riser": mat("/World/m/riser", (0.05, 0.05, 0.055), 0.55, 0.35),
-        "green": mat("/World/m/green", (0.10, 0.38, 0.27), 0.45),
-        "boxgray": mat("/World/m/boxgray", (0.46, 0.47, 0.49), 0.50, 0.35),
-        "insert": mat("/World/m/insert", (0.26, 0.26, 0.28), 0.85),
-        "bolt_gray": mat("/World/m/bgray", (0.52, 0.53, 0.56), 0.32, 1.0),
-        "bolt_black": mat("/World/m/bblack", (0.07, 0.07, 0.08), 0.42, 0.9),
+        "table": mat("/World/m/table", (0.42, 0.44, 0.45), 0.42, 0.65, name="table"),
+        "riser": mat("/World/m/riser", (0.05, 0.05, 0.055), 0.55, 0.35, name="riser"),
+        "green": mat("/World/m/green", (0.10, 0.38, 0.27), 0.45, name="green"),
+        "boxgray": mat("/World/m/boxgray", (0.46, 0.47, 0.49), 0.50, 0.35, name="boxgray"),
+        "insert": mat("/World/m/insert", (0.26, 0.26, 0.28), 0.85, name="insert"),
+        "bolt_gray": mat("/World/m/bgray", (0.52, 0.53, 0.56), 0.32, 1.0, name="bolt_gray"),
+        "bolt_black": mat("/World/m/bblack", (0.07, 0.07, 0.08), 0.42, 0.9, name="bolt_black"),
     }
 
     def sbox(path, c, h, key):
@@ -1478,9 +1609,20 @@ def main() -> int:
 
 
     key = UsdLux.DistantLight.Define(stage, "/World/key")
-    key.CreateIntensityAttr(600.0)
-    key.CreateAngleAttr(12.0)
-    UsdLux.DomeLight.Define(stage, "/World/dome").CreateIntensityAttr(520.0)
+    key.CreateIntensityAttr(KEY_INTENSITY)
+    key.CreateAngleAttr(KEY_ANGLE)
+    UsdLux.DomeLight.Define(stage, "/World/dome").CreateIntensityAttr(DOME_INTENSITY)
+    if SUN_INTENSITY > 0.0:
+        # The window. A DistantLight shines along its local -Z, so tilt it up by
+        # (elevation - 90) about X and swing it round by the azimuth about Z.
+        sun = UsdLux.DistantLight.Define(stage, "/World/sun")
+        sun.CreateIntensityAttr(SUN_INTENSITY)
+        sun.CreateAngleAttr(SUN_ANGLE)
+        UsdGeom.Xformable(sun.GetPrim()).AddRotateXYZOp().Set(
+            Gf.Vec3f(float(SUN_ELEVATION - 90.0), 0.0, float(SUN_AZIMUTH)))
+        print(f"  [light] key {KEY_INTENSITY:g}/{KEY_ANGLE:g}deg  dome {DOME_INTENSITY:g}  "
+              f"sun {SUN_INTENSITY:g}/{SUN_ANGLE:g}deg az {SUN_AZIMUTH:g} el {SUN_ELEVATION:g}",
+              flush=True)
 
     arts = {}
     if args.shared_stack:

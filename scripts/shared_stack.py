@@ -220,6 +220,9 @@ def run_episode(args, settings, scene, world, rep, arts, cameras, tcp_views,
     summary = {"settings": settings, "plant": "isaac_physx", "force_control": sensor.enabled,
                "contact_model": sensor.metadata,
                "scene": scene_metadata,
+               # lighting / tonemap / material overrides decide the policy's pixels, so a board
+               # scored under one photometry must be tellable from a board scored under another
+               "photometry": scene.photometry_metadata(),
                "source_configs": {key: {"path": str(root/settings[key]),
                   "sha256": hashlib.sha256((root/settings[key]).read_bytes()).hexdigest()}
                   for key in ("servo_config", "runner_config")},
