@@ -1,7 +1,7 @@
 {
   "schema": "simulation.photometry_preset.v1",
   "name": "cell_fit_20260912_t013",
-  "status": "candidate -- not the scoring default; boards under it are not comparable to stock boards",
+  "status": "rejected for scoring (2026-09-13 ladder, docs/results/20260913): matches the whole-frame distribution but rails the gray bolts as flat white and shifts both box colours",
   "fit": {
     "round": 5,
     "trial": "t013",

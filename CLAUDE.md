@@ -1,6 +1,6 @@
 # simulation 현재 핸드오프
 
-최신화: 2026-09-07. 시작점은 [README](README.md),
+최신화: 2026-09-13. 시작점은 [README](README.md),
 [공유 스택 계약](docs/shared_stack.md), [최신 결과](docs/results/20260907/README.md)다.
 
 ## 현재 기준
@@ -23,6 +23,11 @@
 - 현재 보드는 [2026-09-07 std40 fx393](docs/results/20260907/README.md)다. veldrop50 29,
   griponly 27, plain_r4 22, ph3_r5 20, ph3_r4 18, plain_r5 17. 광학 보정에 움직인 모델은
   griponly 하나뿐이다(13→27, p=0.022). velocity proprio가 마스킹된 모델만 투영 오차를 전부 떠안는다.
+- **광도(조명·톤매퍼·재질)는 스톡 리그가 채점 기준이다.** 노브는 `EVAL_RTX`/`EVAL_MAT`/`EVAL_*_INTENSITY`,
+  프리셋은 `EVAL_PHOTOMETRY`이고, shared-stack `summary.json`의 `photometry`에 기록된다. 09-12 피팅
+  프리셋 `cell_fit_20260912_t013`은 전체 프레임 분포만 맞췄다. 같은 손목 뷰 사다리
+  ([2026-09-13](docs/results/20260913/README.md))에서 **회색 볼트가 흰 덩어리로 포화**되고 박스 색이
+  틀어져 재채점에 쓰지 않는다. 전 구간 W1은 A 대비 좌 -3.6 / 우 -1.1뿐이다.
 - bias 0 기준 seed 100의 30초 결과는 8001 회색 1개, 8002 안착 0개,
   8003 회색·검정 각 1개다. 단일 장면 결과를 일반적인 모델 순위로 확대하지 않는다.
 
@@ -52,9 +57,13 @@
    (`scripts/real_release_sites.py`).
 2. **채점 재현성.** 서버당 클라이언트 1개로 돌리거나 요청별 시드를 넣는다. 지금은 같은 시드가
    재현되지 않아 보드 간 비교가 배치 고정에 의존한다.
-3. pad/box pose 및 그리퍼 percent–개방 폭·모터 응답·접촉 물성을 실측한다.
-4. 좌팔 `ChunkFollowerFault`(각도 0.1rad 허용치) — 약 360런 중 3건, 전부 좌팔이다.
-5. 같은 다중 장면에서 반복 평가하고 Real 결과와 상관을 검증한다.
+3. **물체 단위 광도 보정.** 회색/검정 볼트·두 박스·바닥면·팁을 실기 프레임 영역과 맞춘다(전체
+   프레임 CDF는 물체를 구속하지 못한다). 끝나면 `scripts/photometry_ladder.py`로 같은 뷰를 확인한
+   뒤 스톡 대비 짝지은 std40을 돌리고, `analyze_grasp_funnel.py`의 들어올린 뒤 박스 밖 release로
+   "운반 중 놓기"를 판정한다.
+4. pad/box pose 및 그리퍼 percent–개방 폭·모터 응답·접촉 물성을 실측한다.
+5. 좌팔 `ChunkFollowerFault`(각도 0.1rad 허용치) — 약 360런 중 3건, 전부 좌팔이다.
+6. 같은 다중 장면에서 반복 평가하고 Real 결과와 상관을 검증한다.
 
 ## 이력
 

@@ -1,0 +1,11 @@
+{
+  "every_sec": 1.0,
+  "about": "Cumulative ladder from the stock rig to the 2026-09-12 fit. B and C hold the stock ingredients they have not yet replaced and are exposure-matched to D once at the first snapshot, so a column differs from its neighbour by structure, not by brightness.",
+  "variants": [
+    {"label": "A_stock"},
+    {"label": "D_fit", "preset": "config/photometry/cell_fit_20260912_t013.json"},
+    {"label": "B_tonemap", "env": {"EVAL_RTX": "/rtx/post/tonemap/op=0"}, "exposure_match": "D_fit"},
+    {"label": "C_light", "preset": "config/photometry/cell_fit_20260912_t013.json",
+     "env": {"EVAL_MAT": ""}, "exposure_match": "D_fit"}
+  ]
+}

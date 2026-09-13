@@ -1,0 +1,10 @@
+{"real_root": "/home/plaif/workspace/robotics_lab/logs/flow_obs_am",
+ "ladder_root": "outputs/photometry_ladder_20260913",
+ "rows": [
+  {"arm": "right", "phase": "① init 자세", "real": "run_20260910_165659/0", "sim": "s100/s000"},
+  {"arm": "right", "phase": "② 파지 직전 (검정)", "real": "run_20260910_165659/32", "sim": "s100/s003"},
+  {"arm": "right", "phase": "③ 검정 볼트 운반", "real": "run_20260910_165659/44", "sim": "s100/s006",
+   "real_crop": [176, 256, 496, 480], "sim_crop": [176, 256, 496, 480]},
+  {"arm": "right", "phase": "④ 박스 위 (검정 쥔 채)", "real": "run_20260910_165659/250", "sim": "s100/s008",
+   "real_crop": [176, 256, 496, 480], "sim_crop": [176, 256, 496, 480]}
+ ]}
