@@ -1,0 +1,32 @@
+  160 runs, 24 workers
+
+model        runs placed misp  closes carries lifted released  over box slipped slip/lift lift p50 gap p50 carry p50
+--------------------------------------------------------------------------------------------------------------------
+A              40     29    0     168     134     89       97        33      37        14     71.9    11.9     0.018
+D              40     23    0      94      44     38       35        20       9         8    293.1    11.8     0.261
+C              40     20    0     149      58     48       40        19      18        12    144.9    11.9     0.036
+B              40     14    0     136      66     47       41        16      25        12     74.4    11.9     0.018
+
+model       arm     carries released  over box   to-box p50/p90 (mm)  lift p50  carry p50  hold p50
+---------------------------------------------------------------------------------------------------
+A           left         84       64        11        144/230               62         14       0.8
+A           right        50       33        22          0/200              120         38       2.2
+D           left         29       22        14          0/139              293        283       3.9
+D           right        15       13         6         52/186              322         63       4.0
+C           left         48       32        14         86/217              136         28       2.2
+C           right        10        8         5          0/186              262        145       4.5
+B           left         46       28         6        168/201               74         11       0.9
+B           right        20       13        10          0/171              153         37       1.7
+
+  seed-matched A vs B: 40 seeds
+  metric                           A           B     B-A    seeds B>A / B<A    sign test p
+  --------------------------------------------------------------------------------------
+  placed                          29          14     -15         6 / 17              0.035
+  close attempts                 168         136     -32        14 / 19              0.487
+  carries                        134          66     -68         6 / 32              0.000
+  releases                        97          41     -56         4 / 32              0.000
+  releases over box               33          16     -17         6 / 17              0.035
+  A release->box: p50 128 mm, p90 223 mm, over box 33/97
+  B release->box: p50 129 mm, p90 195 mm, over box 16/41
+
+  -> /tmp/pb_full_A,B.json

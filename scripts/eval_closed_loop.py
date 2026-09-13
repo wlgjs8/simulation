@@ -1620,6 +1620,9 @@ def main() -> int:
         sun.CreateAngleAttr(SUN_ANGLE)
         UsdGeom.Xformable(sun.GetPrim()).AddRotateXYZOp().Set(
             Gf.Vec3f(float(SUN_ELEVATION - 90.0), 0.0, float(SUN_AZIMUTH)))
+    if (KEY_INTENSITY, KEY_ANGLE, DOME_INTENSITY, SUN_INTENSITY) != (600.0, 12.0, 520.0, 0.0):
+        # printed for ANY non-stock light, not only when a sun exists: a key/dome-only preset
+        # (the tonemap-only ladder step) otherwise leaves no trace in the run log
         print(f"  [light] key {KEY_INTENSITY:g}/{KEY_ANGLE:g}deg  dome {DOME_INTENSITY:g}  "
               f"sun {SUN_INTENSITY:g}/{SUN_ANGLE:g}deg az {SUN_AZIMUTH:g} el {SUN_ELEVATION:g}",
               flush=True)

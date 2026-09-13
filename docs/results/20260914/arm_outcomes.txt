@@ -1,0 +1,27 @@
+cond arm   lifted  rel_over rel_off slip  held@30s(over box)  rest_correct  off/lifted [95% CI seeds-bootstrap]
+A    left      56        11      37    5        5(1)            18   0.66 [0.49, 0.78]
+A    right     33        19       8    1        5(0)            20   0.24 [0.08, 0.42]
+B    left      32         6      19    3        5(1)             7   0.59 [0.38, 0.75]
+B    right     15         8       2    4        1(0)             9   0.13 [0.00, 0.33]
+C    left      39        14      15    3        9(1)            16   0.38 [0.23, 0.53]
+C    right      9         5       2    2        1(1)             5   0.22 [0.00, 0.56]
+D    left      25        14       5    1        5(3)            17   0.20 [0.04, 0.39]
+D    right     13         6       5    0        3(0)             7   0.38 [0.13, 0.64]
+left  A vs B off      seeds B>A  6 / B<A 13  p=0.167
+left  A vs B lifted   seeds B>A  6 / B<A 19  p=0.015
+left  A vs B correct  seeds B>A  3 / B<A  9  p=0.146
+left  A vs C off      seeds C>A  6 / C<A 13  p=0.167
+left  A vs C lifted   seeds C>A  9 / C<A 14  p=0.405
+left  A vs C correct  seeds C>A  7 / C<A  5  p=0.774
+left  A vs D off      seeds D>A  2 / D<A 16  p=0.001
+left  A vs D lifted   seeds D>A  6 / D<A 17  p=0.035
+left  A vs D correct  seeds D>A 10 / D<A  7  p=0.629
+right A vs B off      seeds B>A  1 / B<A  5  p=0.219
+right A vs B lifted   seeds B>A  3 / B<A 17  p=0.003
+right A vs B correct  seeds B>A  3 / B<A 12  p=0.035
+right A vs C off      seeds C>A  1 / C<A  5  p=0.219
+right A vs C lifted   seeds C>A  2 / C<A 21  p=0.000
+right A vs C correct  seeds C>A  2 / C<A 14  p=0.004
+right A vs D off      seeds D>A  5 / D<A  6  p=1.000
+right A vs D lifted   seeds D>A  1 / D<A 17  p=0.000
+right A vs D correct  seeds D>A  2 / D<A 13  p=0.007

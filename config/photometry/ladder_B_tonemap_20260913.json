@@ -1,0 +1,12 @@
+{
+  "schema": "simulation.photometry_preset.v1",
+  "status": "ladder step fixed for the 2026-09-13/14 devjit A-D board; not a scoring standard",
+  "name": "ladder_B_tonemap_20260913",
+  "about": "stock rig with the hard-clamp tonemapper only: stock light RATIOS and angle, stock materials, exposure = stock intensities x 0.0030, the scale the ladder matched to D's median at the first snapshot in all three episodes (0.00310 / 0.00296 / 0.00300)",
+  "env": {
+    "EVAL_RTX": "/rtx/post/tonemap/op=0",
+    "EVAL_KEY_INTENSITY": "1.8000",
+    "EVAL_KEY_ANGLE": "12",
+    "EVAL_DOME_INTENSITY": "1.5600"
+  }
+}

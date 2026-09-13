@@ -1,0 +1,16 @@
+{
+  "schema": "simulation.photometry_preset.v1",
+  "status": "ladder step fixed for the 2026-09-13/14 devjit A-D board; not a scoring standard",
+  "name": "ladder_C_light_20260913",
+  "about": "hard clamp + the t013 lights (key/dome/window sun, angles and direction), stock materials, intensities x 0.7358 = median of the ladder's per-episode match to D (0.736 / 0.665 / 0.959)",
+  "env": {
+    "EVAL_RTX": "/rtx/post/tonemap/op=0",
+    "EVAL_KEY_INTENSITY": "0.7031",
+    "EVAL_KEY_ANGLE": "33.70",
+    "EVAL_DOME_INTENSITY": "2.0436",
+    "EVAL_SUN_INTENSITY": "1.9759",
+    "EVAL_SUN_ANGLE": "2.04",
+    "EVAL_SUN_AZIMUTH": "332.4",
+    "EVAL_SUN_ELEVATION": "29.8"
+  }
+}
