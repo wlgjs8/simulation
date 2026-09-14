@@ -1,0 +1,4 @@
+rb3  A  n=  8892  p50   73.2 ms  p90   92.0 ms  p99  123.1 ms
+rb3  D  n=  8886  p50   73.0 ms  p90   92.3 ms  p99  126.8 ms
+rb3  E  n=  8886  p50   73.6 ms  p90   92.5 ms  p99  125.3 ms
+rb3  G  n=  8873  p50   72.9 ms  p90   91.9 ms  p99  121.7 ms

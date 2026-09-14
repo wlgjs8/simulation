@@ -1,0 +1,12 @@
+pooled over both batches (80 seed pairs):
+  A->G placed  both   total  72 ->  99   seeds up/down 31/12  p=0.0054   (sep 14/8, rep 17/4)
+  A->E placed  both   total  72 ->  83   seeds up/down 33/26  p=0.4350   (sep 16/14, rep 17/12)
+  A->D placed  both   total  72 ->  47   seeds up/down 15/30  p=0.0357   (sep 8/17, rep 7/13)
+  D->E placed  both   total  47 ->  83   seeds up/down 42/8  p=0.0000   (sep 22/3, rep 20/5)
+  D->G placed  both   total  47 ->  99   seeds up/down 44/6  p=0.0000   (sep 19/3, rep 25/3)
+  D->G correct right  total  12 ->  35   seeds up/down 24/3  p=0.0000   (sep 10/0, rep 14/3)
+  D->E correct left   total  37 ->  69   seeds up/down 36/7  p=0.0000   (sep 20/3, rep 16/4)
+  A->G correct left   total  43 ->  70   seeds up/down 34/9  p=0.0002   (sep 14/8, rep 20/1)
+  A->G off     left   total  38 ->  12   seeds up/down 6/23  p=0.0023   (sep 3/14, rep 3/9)
+  A->D off     left   total  38 ->  13   seeds up/down 7/23  p=0.0052   (sep 5/13, rep 2/10)
+  A->E off     left   total  38 ->  26   seeds up/down 18/24  p=0.4408   (sep 5/14, rep 13/10)
