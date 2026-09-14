@@ -1,0 +1,27 @@
+{
+  "schema": "simulation.bolt_geometry.v1",
+  "name": "iso_heads_20260914",
+  "status": "PROVISIONAL -- M12 ISO table values plus the rig's existing black-bolt envelope; replace with caliper measurements of the real parts",
+  "evidence": "docs/results/20260914/bolt_threads/README.md (robotics_lab flow_obs_am run_20260910_165659: black = socket-head cap screw, knurled cylindrical head; gray = button-head socket screw, low wide dome)",
+  "pitch_m": 0.00175,
+  "thread": true,
+  "mass_reference": {"color": "black", "mass_kg": 0.022, "note": "the rig's historical 22 g; gray is scaled by collider volume so the two keep the ratio of their shapes"},
+  "black": {
+    "head": "socket_cap",
+    "standard": "ISO 4762 M12 (dk 18, k 12, s 10); the rig's 18.4 mm head is kept so the black collider and every black-bolt contact are unchanged",
+    "d_m": 0.012, "length_m": 0.025,
+    "head_d_m": 0.0184, "head_k_m": 0.012,
+    "socket_s_m": 0.010, "socket_depth_m": 0.006,
+    "chamfer_m": 0.0006, "knurl_ridges": 72, "knurl_depth_m": 0.00012,
+    "mass_kg": 0.022
+  },
+  "gray": {
+    "head": "button",
+    "standard": "ISO 7380-1 M12 (dk 21, k 6.6, s 8, t 4.4); dome = arc through a 0.5 mm edge and a 5.8 mm-radius top flat",
+    "d_m": 0.012, "length_m": 0.025,
+    "head_d_m": 0.021, "head_k_m": 0.0066,
+    "socket_s_m": 0.008, "socket_depth_m": 0.0044,
+    "edge_h_m": 0.0005, "top_flat_r_m": 0.0058,
+    "mass_kg": "scale_by_collider_volume"
+  }
+}

@@ -1,0 +1,12 @@
+{"real_root": "/home/plaif/workspace/robotics_lab/logs/flow_obs_am",
+ "ladder_root": "outputs/photometry_ladder_20260914",
+ "variants": ["A_isoheads", "G_isoheads"],
+ "rows": [
+  {"arm": "left", "phase": "① init (회색 더미)", "real": "run_20260910_165659/0", "sim": "H101/s000"},
+  {"arm": "left", "phase": "② 파지 직전 (회색)", "real": "run_20260910_165659/300", "sim": "H101/s014",
+   "real_crop": [200, 160, 520, 384], "sim_crop": [160, 200, 480, 424]},
+  {"arm": "right", "phase": "② 접근 (검정)", "real": "run_20260910_165659/32", "sim": "H100/s004",
+   "real_crop": [100, 200, 420, 424], "sim_crop": [160, 200, 480, 424]},
+  {"arm": "right", "phase": "③ 검정 볼트 운반", "real": "run_20260910_165659/44", "sim": "H101/s009",
+   "real_crop": [176, 256, 496, 480], "sim_crop": [176, 256, 496, 480]}
+ ]}

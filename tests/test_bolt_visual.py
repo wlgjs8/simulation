@@ -55,3 +55,62 @@ class ThreadedShaftTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+GEOM = pathlib.Path(__file__).resolve().parents[1] / "config/bolts/iso_heads_20260914.json"
+
+
+class HeadTest(unittest.TestCase):
+    def setUp(self):
+        self.spec = bolt_visual.load_geometry(GEOM)
+
+    def _envelope(self, mesh, c):
+        pts = mesh[0]
+        r = np.hypot(pts[:, 1], pts[:, 2])
+        self.assertLessEqual(r.max(), c["head_d_m"] / 2 + 1e-9)
+        self.assertAlmostEqual(pts[:, 0].min(), -c["head_k_m"], places=9)
+        self.assertLessEqual(pts[:, 0].max(), 1e-12)
+
+    def test_black_head_stays_inside_the_unchanged_collider(self):
+        c = self.spec["black"]
+        self._envelope(bolt_visual.socket_cap_head_mesh(c, c["d_m"]), c)
+        self.assertEqual(c["mass_kg_effective"], 0.022)
+
+    def test_gray_head_is_a_low_wide_dome(self):
+        c = self.spec["gray"]
+        self._envelope(bolt_visual.button_head_mesh(c, c["d_m"]), c)
+        arc, rt = bolt_visual.button_profile(c)
+        self.assertAlmostEqual(arc[0][0], -c["head_k_m"], places=12)
+        self.assertAlmostEqual(arc[0][1], rt, places=12)
+        self.assertAlmostEqual(arc[-1][1], c["head_d_m"] / 2, places=12)
+        r = [p[1] for p in arc]
+        self.assertTrue(all(b >= a - 1e-12 for a, b in zip(r, r[1:])))   # widens monotonically to the rim
+
+    def test_socket_is_a_hexagon_of_the_declared_size(self):
+        s = self.spec["gray"]["socket_s_m"]
+        self.assertAlmostEqual(float(bolt_visual.hex_radius(math.pi / 6, s)), s / 2, places=12)      # flat
+        self.assertAlmostEqual(float(bolt_visual.hex_radius(0.0, s)), s / math.sqrt(3), places=12)  # corner
+
+    def test_collider_is_closed_and_outward(self):
+        pts, cnt, idx, _ = bolt_visual.button_head_collider(self.spec["gray"], n_theta=256)
+        dome = bolt_visual.mesh_volume(pts, cnt, idx)
+        c = self.spec["gray"]
+        cyl = math.pi * (c["head_d_m"] / 2) ** 2 * c["head_k_m"]
+        self.assertGreater(dome, 0.0)
+        self.assertLess(dome, cyl)                    # a dome is less than its bounding cylinder
+        self.assertGreater(dome, 0.5 * cyl)
+
+    def test_gray_is_lighter_by_its_shape(self):
+        g, b = self.spec["gray"], self.spec["black"]
+        self.assertAlmostEqual(g["mass_kg_effective"] / b["mass_kg_effective"],
+                               g["collider_volume_m3"] / b["collider_volume_m3"], places=12)
+        self.assertLess(g["mass_kg_effective"], b["mass_kg_effective"])
+
+    def test_invalid_spec_is_refused(self):
+        import json, tempfile
+        bad = json.loads(GEOM.read_text())
+        bad["gray"]["socket_depth_m"] = 0.01                  # deeper than the 6.6 mm head
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            json.dump(bad, f)
+        with self.assertRaises(ValueError):
+            bolt_visual.load_geometry(f.name)

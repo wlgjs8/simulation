@@ -291,6 +291,46 @@ BOLT_VISUAL = os.environ.get("EVAL_BOLT_VISUAL", "").strip()
 if BOLT_VISUAL not in ("", "threaded"):
     raise SystemExit(f"EVAL_BOLT_VISUAL: unknown value {BOLT_VISUAL!r} (expected '' or 'threaded')")
 BOLT_PITCH = 0.00175
+# EVAL_BOLT_GEOMETRY names a tracked spec (config/bolts/*.json) that gives each colour its own
+# head: on the robot the black bolts are socket-head cap screws and the gray ones button-head
+# screws. Unlike EVAL_BOLT_VISUAL this changes PHYSICS for any colour whose collider differs (the
+# gray dome is a convex-hull collider with its own mass), so frozen scene states must have been
+# settled with the same spec -- a mismatch is refused. It implies the threaded shaft when the spec
+# says "thread": true. Only the aligned layout, whose bolt i is gray for i < n_per_colour in every
+# seed, can bind a head to a bolt at build time. Empty = the historical cylinders.
+import bolt_visual  # noqa: E402
+
+BOLT_GEOMETRY_PATH = os.environ.get("EVAL_BOLT_GEOMETRY", "").strip()
+BOLT_GEOMETRY = None
+if BOLT_GEOMETRY_PATH:
+    _gp = pathlib.Path(BOLT_GEOMETRY_PATH)
+    if not _gp.is_absolute() and not _gp.exists():
+        _gp = pathlib.Path(__file__).resolve().parents[1] / _gp
+    BOLT_GEOMETRY = bolt_visual.load_geometry(_gp)
+
+
+def bolt_geometry_metadata():
+    """What the bolts are, for run provenance; None = the historical two-cylinder bolt."""
+    if BOLT_GEOMETRY is None:
+        return None
+    return {"name": BOLT_GEOMETRY["name"], "path": BOLT_GEOMETRY["path"],
+            "sha256": BOLT_GEOMETRY["sha256"], "status": BOLT_GEOMETRY["status"],
+            **{c: {"head": BOLT_GEOMETRY[c]["head"], "mass_kg": BOLT_GEOMETRY[c]["mass_kg_effective"],
+                   "head_d_m": BOLT_GEOMETRY[c]["head_d_m"], "head_k_m": BOLT_GEOMETRY[c]["head_k_m"]}
+               for c in ("gray", "black")}}
+
+
+def bolt_aabb_proxies(color):
+    """Bounding cylinders (axial centre, half length, radius) of one bolt, for support checks."""
+    if BOLT_GEOMETRY is None:
+        return [(SHAFT_L / 2, SHAFT_L / 2, SHAFT_R), (-HEAD_L / 2, HEAD_L / 2, HEAD_R)]
+    return bolt_visual.aabb_proxies(BOLT_GEOMETRY[color])
+
+
+def bolt_max_radius():
+    if BOLT_GEOMETRY is None:
+        return HEAD_R
+    return max(max(BOLT_GEOMETRY[c]["head_d_m"], BOLT_GEOMETRY[c]["d_m"]) / 2 for c in ("gray", "black"))
 
 
 def photometry_metadata() -> dict:
@@ -302,7 +342,8 @@ def photometry_metadata() -> dict:
                       "sun": SUN_INTENSITY, "sun_angle": SUN_ANGLE,
                       "sun_az": SUN_AZIMUTH, "sun_el": SUN_ELEVATION},
             "material_overrides": {k: dict(v) for k, v in _MAT_OVERRIDE.items()},
-            "bolt_visual": BOLT_VISUAL or "plain"}
+            "bolt_visual": ("threaded" if (BOLT_VISUAL == "threaded" or (BOLT_GEOMETRY or {}).get("thread"))
+                            else "plain")}
 
 
 MEASURED_OPTICS = (17.8885, 13.4524)
@@ -1402,6 +1443,8 @@ def main() -> int:
         if not math.isfinite(args.episode_sec) or args.episode_sec <= 0:
             ap.error("--episode-sec must be positive")
         os.environ["GRIP_MAXF"] = str(shared_config["gripper_max_force_n"])
+    if BOLT_GEOMETRY is not None and args.layout != "aligned":
+        ap.error("EVAL_BOLT_GEOMETRY binds heads by bolt index, which only the aligned layout keeps fixed")
     if args.protocol in ("std20", "std40"):
         n = 20 if args.protocol == "std20" else 40
         args.episodes, args.seed, args.episode_sec = n, 100, 30.0
@@ -1415,8 +1458,15 @@ def main() -> int:
     _SCENE_STATES, _DUMP = {}, {}
     if args.scene_states:
         _SCENE_STATES = json.loads(pathlib.Path(args.scene_states).read_text())
-        for frozen in _SCENE_STATES.values():
+        _want = BOLT_GEOMETRY["sha256"] if BOLT_GEOMETRY else None
+        for _seed, frozen in _SCENE_STATES.items():
             work_surface.check_frozen(frozen, WORK_SURFACE)
+            _have = (frozen.get("bolt_geometry") or {}).get("sha256")
+            if _have != _want:
+                _die(f"ABORT: frozen scene seed {_seed} was settled with bolt geometry "
+                     f"{(frozen.get('bolt_geometry') or {}).get('name', 'historical cylinders')} but this run "
+                     f"uses {BOLT_GEOMETRY['name'] if BOLT_GEOMETRY else 'historical cylinders'}; "
+                     "re-freeze with scripts/freeze_work_surface.py under the same EVAL_BOLT_GEOMETRY")
         print(f"[eval] frozen scenes: {len(_SCENE_STATES)} seeds from {args.scene_states}")
     RTC_ENABLED = bool(args.rtc)
     CHUNK_EXECUTE_STEPS = int(args.execute_steps)
@@ -1567,49 +1617,89 @@ def main() -> int:
 
     n_bolts = args.n_per_color * 2
     bolt_prims = []
-    if BOLT_VISUAL == "threaded":
-        # One prototype under a class prim (never rendered itself); each bolt references it.
-        import bolt_visual
-        _pts, _cnt, _idx, _nrm = bolt_visual.threaded_shaft_mesh(2 * SHAFT_R, SHAFT_L, BOLT_PITCH)
+    def _mesh(mpath, mesh):
+        pts, cnt, idx, nrm = mesh
+        m = UsdGeom.Mesh.Define(stage, mpath)
+        m.CreatePointsAttr(Vt.Vec3fArray.FromNumpy(pts.astype(np.float32)))
+        m.CreateFaceVertexCountsAttr(Vt.IntArray.FromNumpy(cnt))
+        m.CreateFaceVertexIndicesAttr(Vt.IntArray.FromNumpy(idx))
+        m.CreateNormalsAttr(Vt.Vec3fArray.FromNumpy(nrm.astype(np.float32)))
+        m.SetNormalsInterpolation(UsdGeom.Tokens.vertex)
+        m.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
+        m.CreateExtentAttr(Vt.Vec3fArray([Gf.Vec3f(*pts.min(0)), Gf.Vec3f(*pts.max(0))]))
+        return m
+
+    _threaded = BOLT_VISUAL == "threaded" or bool(BOLT_GEOMETRY and BOLT_GEOMETRY.get("thread"))
+    _spec = {c: BOLT_GEOMETRY[c] for c in ("gray", "black")} if BOLT_GEOMETRY else {}
+    if _threaded or _spec:
+        # Prototypes live under a class prim (never rendered themselves); each bolt references them.
         stage.CreateClassPrim("/_bolt_proto")
-        _m = UsdGeom.Mesh.Define(stage, "/_bolt_proto/shaft_thread")
-        _m.CreatePointsAttr(Vt.Vec3fArray.FromNumpy(_pts.astype(np.float32)))
-        _m.CreateFaceVertexCountsAttr(Vt.IntArray.FromNumpy(_cnt))
-        _m.CreateFaceVertexIndicesAttr(Vt.IntArray.FromNumpy(_idx))
-        _m.CreateNormalsAttr(Vt.Vec3fArray.FromNumpy(_nrm.astype(np.float32)))
-        _m.SetNormalsInterpolation(UsdGeom.Tokens.vertex)
-        _m.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
-        _m.CreateExtentAttr(Vt.Vec3fArray([Gf.Vec3f(*_pts.min(0)), Gf.Vec3f(*_pts.max(0))]))
-        print(f"  [bolt] threaded shaft visual: {len(_pts)} verts, {len(_cnt)} faces, "
+    if _spec:
+        for _c, _g in _spec.items():
+            if _threaded:
+                _mesh(f"/_bolt_proto/thread_{_c}",
+                      bolt_visual.threaded_shaft_mesh(_g["d_m"], _g["length_m"], BOLT_GEOMETRY["pitch_m"]))
+            _mesh(f"/_bolt_proto/head_{_c}", bolt_visual.button_head_mesh(_g, _g["d_m"])
+                  if _g["head"] == "button" else bolt_visual.socket_cap_head_mesh(_g, _g["d_m"]))
+            print(f"  [bolt] {_c}: {_g['head']} head {_g['head_d_m'] * 1000:.1f} x {_g['head_k_m'] * 1000:.1f} mm, "
+                  f"M{_g['d_m'] * 1000:.0f} x {_g['length_m'] * 1000:.0f}, mass {_g['mass_kg_effective'] * 1000:.1f} g"
+                  f"{', threaded' if _threaded else ''}  ({BOLT_GEOMETRY['name']}: {BOLT_GEOMETRY['status'][:40]})",
+                  flush=True)
+    elif _threaded:
+        _pts = bolt_visual.threaded_shaft_mesh(2 * SHAFT_R, SHAFT_L, BOLT_PITCH)
+        _mesh("/_bolt_proto/thread_plain", _pts)
+        print(f"  [bolt] threaded shaft visual: {len(_pts[0])} verts, {len(_pts[1])} faces, "
               f"pitch {BOLT_PITCH * 1000:.2f} mm; shaft collider hidden (purpose guide)", flush=True)
+
+    def _physmat(prim):
+        # The bolts have never had a physics material -- friction and restitution have been
+        # whatever PhysX defaults to (0.5/0.5/0). On a task that is entirely about pinching a
+        # smooth cylinder, that is an unexamined parameter, so make it explicit and tunable.
+        if _PHYSMAT is not None:
+            UsdShade.MaterialBindingAPI.Apply(prim)
+            UsdShade.MaterialBindingAPI(prim).Bind(
+                UsdShade.Material(_PHYSMAT), bindingStrength=UsdShade.Tokens.weakerThanDescendants,
+                materialPurpose="physics")
+
     for i in range(n_bolts):
         path = f"/World/scene/bolt_{i:02d}"
         xf = UsdGeom.Xform.Define(stage, path)
         xf.MakeMatrixXform().Set(Gf.Matrix4d().SetTranslate(Gf.Vec3d(0.4, 0, 0.05 + 0.05 * i)))
         prim = xf.GetPrim()
+        _color = ("gray" if i < args.n_per_color else "black") if _spec else None
+        _g = _spec.get(_color)
         UsdPhysics.RigidBodyAPI.Apply(prim)
-        UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(0.022)
-        for tag, rr, hl, cx in (("shaft", SHAFT_R, SHAFT_L / 2, SHAFT_L / 2),
-                                ("head", HEAD_R, HEAD_L / 2, -HEAD_L / 2)):
+        UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(_g["mass_kg_effective"] if _g else 0.022)
+        _shaft_r, _shaft_l = (_g["d_m"] / 2, _g["length_m"]) if _g else (SHAFT_R, SHAFT_L)
+        _parts = [("shaft", _shaft_r, _shaft_l / 2, _shaft_l / 2)]
+        if _g is None or _g["head"] == "socket_cap":
+            _hr, _hk = (_g["head_d_m"] / 2, _g["head_k_m"]) if _g else (HEAD_R, HEAD_L)
+            _parts.append(("head", _hr, _hk / 2, -_hk / 2))
+        for tag, rr, hl, cx in _parts:
             cy_ = UsdGeom.Cylinder.Define(stage, f"{path}/{tag}")
             cy_.CreateRadiusAttr(rr)
             cy_.CreateHeightAttr(hl * 2)
             cy_.CreateAxisAttr("X")
             UsdGeom.Xformable(cy_).AddTranslateOp().Set(Gf.Vec3d(cx, 0, 0))
             UsdPhysics.CollisionAPI.Apply(cy_.GetPrim())
-            if BOLT_VISUAL == "threaded" and tag == "shaft":
+            if (tag == "shaft" and _threaded) or (tag == "head" and _g is not None):
                 cy_.CreatePurposeAttr(UsdGeom.Tokens.guide)
-            # The bolts have never had a physics material -- friction and restitution have been
-            # whatever PhysX defaults to (0.5/0.5/0). On a task that is entirely about pinching a
-            # smooth cylinder, that is an unexamined parameter, so make it explicit and tunable.
-            if _PHYSMAT is not None:
-                UsdShade.MaterialBindingAPI.Apply(cy_.GetPrim())
-                UsdShade.MaterialBindingAPI(cy_.GetPrim()).Bind(
-                    UsdShade.Material(_PHYSMAT), bindingStrength=UsdShade.Tokens.weakerThanDescendants,
-                    materialPurpose="physics")
-        if BOLT_VISUAL == "threaded":
+            _physmat(cy_.GetPrim())
+        if _g is not None and _g["head"] == "button":
+            # the dome: a convex hull of the revolved profile (the socket is not part of contact)
+            _hull = _mesh(f"{path}/head", bolt_visual.button_head_collider(_g))
+            UsdPhysics.CollisionAPI.Apply(_hull.GetPrim())
+            UsdPhysics.MeshCollisionAPI.Apply(_hull.GetPrim()).CreateApproximationAttr(
+                UsdPhysics.Tokens.convexHull)
+            _hull.CreatePurposeAttr(UsdGeom.Tokens.guide)
+            _physmat(_hull.GetPrim())
+        if _threaded:
             stage.DefinePrim(f"{path}/thread").GetReferences().AddInternalReference(
-                "/_bolt_proto/shaft_thread")
+                f"/_bolt_proto/thread_{_color or 'plain'}")
+        if _g is not None:
+            stage.DefinePrim(f"{path}/head_visual").GetReferences().AddInternalReference(
+                f"/_bolt_proto/head_{_color}")
+            prim.CreateAttribute("simulation:boltColor", Sdf.ValueTypeNames.String).Set(_color)
         bolt_prims.append(path)
 
     # FINGERTIP / TABLE FRICTION. (Placed AFTER scene build: the first version ran before
@@ -2343,7 +2433,7 @@ def main() -> int:
         for (color, x, y, yaw), path in zip(poses, bolt_prims):
             v = bolt_views[path]
             qz = np.array([math.cos(yaw / 2), 0.0, 0.0, math.sin(yaw / 2)])
-            start_z = PICK_SURFACE_Z + (HEAD_R + 0.001 if 'size_m' in WORK_SURFACE else SHAFT_R + 0.002)
+            start_z = PICK_SURFACE_Z + (bolt_max_radius() + 0.001 if 'size_m' in WORK_SURFACE else SHAFT_R + 0.002)
             v.set_world_poses(np.array([[x, y, start_z]]), np.array([qz]))
             v.set_velocities(np.zeros((1, 6)))
         for i, path in enumerate(bolt_prims):
@@ -2351,9 +2441,10 @@ def main() -> int:
                 MAT["bolt_gray" if colors[i] == "gray" else "bolt_black"])
             UsdShade.MaterialBindingAPI(stage.GetPrimAtPath(path + "/head")).Bind(
                 MAT["bolt_gray" if colors[i] == "gray" else "bolt_black"])
-            if stage.GetPrimAtPath(path + "/thread").IsValid():
-                UsdShade.MaterialBindingAPI.Apply(stage.GetPrimAtPath(path + "/thread")).Bind(
-                    MAT["bolt_gray" if colors[i] == "gray" else "bolt_black"])
+            for _part in ("thread", "head_visual"):
+                if stage.GetPrimAtPath(f"{path}/{_part}").IsValid():
+                    UsdShade.MaterialBindingAPI.Apply(stage.GetPrimAtPath(f"{path}/{_part}")).Bind(
+                        MAT["bolt_gray" if colors[i] == "gray" else "bolt_black"])
         frozen = None
         if args.scene_states:
             frozen = _SCENE_STATES.get(str(ep_seed))

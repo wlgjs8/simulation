@@ -146,15 +146,19 @@ def verify_stage(stage, profile, table_z):
                 physics_material=str(material.GetPath()),stiffness_n_m=k,damping_ns_m=d)
 
 
-def verify_bolts(profile, table_z, poses):
-    """Check settled whole bolt footprints and support height, not just their origins."""
+def verify_bolts(profile, table_z, poses, proxies=None):
+    """Check settled whole bolt footprints and support height, not just their origins.
+
+    proxies: per bolt, the (axial centre, half length, radius) cylinders that bound it; default is
+    the historical M12x25 shaft + 18.4x12 head for every bolt.
+    """
     from scipy.spatial.transform import Rotation
     issues=[]; heights=[]
     for i,pose in enumerate(poses):
         p=np.asarray(pose['p']);q=np.asarray(pose['q']);r=Rotation.from_quat(q[[1,2,3,0]])
         # Exact world AABB of the two cylinders oriented along the bolt's local X.
         axis=r.apply([1,0,0]); lows=[]; highs=[]
-        for cx,half,radius in ((.0125,.0125,.006),(-.006,.006,.0092)):
+        for cx,half,radius in (proxies[i] if proxies is not None else ((.0125,.0125,.006),(-.006,.006,.0092))):
             center=p+r.apply([cx,0,0]); ext=np.abs(axis)*half+radius*np.sqrt(np.maximum(0,1-axis**2))
             lows.append(center-ext);highs.append(center+ext)
         lo=np.min(lows,axis=0);hi=np.max(highs,axis=0)

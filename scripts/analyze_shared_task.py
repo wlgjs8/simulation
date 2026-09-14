@@ -22,7 +22,10 @@ for port,record in manifest['models'].items():
         xyz=all_xyz[name];delta=(xyz-origin)*1000
         v=np.array(poses[-1]['bolts'][name]);rotation=Rotation.from_quat(v[[4,5,6,3]])
         axis=rotation.as_matrix()[:,0];bounds=[]
-        for x,length,radius in [(-.006,.012,.0092),(.0125,.025,.006)]:
+        shapes=(summary['scene']['bolt_proxies'][idx] if 'bolt_proxies' in summary['scene']
+                else [(-.006,.006,.0092),(.0125,.0125,.006)])      # (axial centre, half length, radius)
+        for x,half,radius in shapes:
+            length=2*half
             center=rotation.apply([x,0,0])+v[:3]
             extent=length/2*np.abs(axis)+radius*np.sqrt(np.maximum(0,1-axis**2))
             bounds.append((center-extent,center+extent))

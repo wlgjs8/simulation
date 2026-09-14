@@ -40,8 +40,11 @@
   운반 중 박스 밖 놓기는 E에서 재현되지 않았고(0.16→0.40), t013 회색 볼트 재질이 있는 D·F·G에서만
   일관되게 낮다. 즉 볼트 재질에 반응한다. G가 채점 광도 후보이지만, 기준 교체는 아직 결정하지 않았다.
 - **볼트 외형**: `EVAL_BOLT_VISUAL=threaded`는 렌더 전용 M12 나사산을 넣는다(충돌 원통은 숨겨서 유지,
-  seed 100 초기 자세가 기존 보드와 완전히 같다). 기본값은 원통이다. 실기 회색 볼트는 **버튼 헤드**인데
-  sim은 두 색 모두 소켓 캡 원통 머리다(미반영, 실물 치수 측정 필요). 손목 카메라는 Isaac 기본 DLSS
+  seed 100 초기 자세가 기존 보드와 완전히 같다). 기본값은 원통이다. 실기 회색 볼트는 **버튼 헤드**라서
+  `EVAL_BOLT_GEOMETRY=config/bolts/iso_heads_20260914.json`(회색 돔 볼록 껍질 충돌체 16.4 g, 검정 널링·육각 렌더,
+  둘 다 나사산)로 반영했다. 반드시 `assets/scene_states40_aligned_rb5_foam_isoheads.json`과 함께 쓴다(형상이
+  다른 배치 파일은 거부된다). **치수는 M12 규격표 임시값이고, 이 형상의 보드는 아직 없다**
+  ([bolt_heads](docs/results/20260914/bolt_heads/README.md)). 손목 카메라는 Isaac 기본 DLSS
   Performance라 320×240에서 업스케일된다(원본 해상도는 `EVAL_RTX=/rtx/post/aa/op=4`).
   [bolt_threads](docs/results/20260914/bolt_threads/README.md)
 - bias 0 기준 seed 100의 30초 결과는 8001 회색 1개, 8002 안착 0개,

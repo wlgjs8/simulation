@@ -1,0 +1,8 @@
+{
+  "every_sec": 1.0,
+  "about": "Visual check of EVAL_BOLT_GEOMETRY=config/bolts/iso_heads_20260914.json (gray button heads, black knurled socket caps, threaded shafts) under the stock rig (A) and G.",
+  "variants": [
+    {"label": "A_isoheads"},
+    {"label": "G_isoheads", "preset": "config/photometry/sep_G_fit_iray_20260914.json"}
+  ]
+}

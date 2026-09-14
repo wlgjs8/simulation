@@ -38,7 +38,8 @@ TITLES = {"real": "실기 (flow_obs_am)", "A_stock": "A 기존 리그", "B_tonem
           "A_plain": "A 기존 · 원통 볼트", "A_threaded": "A 기존 · 나사산",
           "G_plain": "G · 원통 볼트", "G_threaded": "G · 나사산",
           "A_thr_dlssPerf": "A 나사산 · DLSS Perf (기본, 320×240)", "A_thr_dlssQual": "A 나사산 · DLSS Quality",
-          "A_thr_dlaa": "A 나사산 · DLAA (640×480)", "G_thr_dlaa": "G 나사산 · DLAA"}
+          "A_thr_dlaa": "A 나사산 · DLAA (640×480)", "G_thr_dlaa": "G 나사산 · DLAA",
+          "A_isoheads": "A · 새 볼트(버튼 헤드·나사산)", "G_isoheads": "G · 새 볼트(버튼 헤드·나사산)"}
 
 
 def lum(rgb):

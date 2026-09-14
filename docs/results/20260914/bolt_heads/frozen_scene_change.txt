@@ -1,0 +1,8 @@
+max position change vs historical frozen scenes (mm): {'gray': 77.96, 'black': 2.79}
+gray: axis tilt from horizontal (deg) p10 -9.7 p50 -9.7 p90 -9.7
+black: axis tilt from horizontal (deg) p10 -7.3 p50 -7.3 p90 -7.2
+seeds needing extended settle: {'102': 1500, '104': 1250, '105': 1250, '106': 1750, '113': 1250, '115': 1500, '118': 1250, '120': 1250, '128': 1250, '130': 1250, '135': 1750, '136': 1250, '138': 1250, '139': 1500}
+all tagged with geometry: True
+gray xy displacement mm: p50 5.8 p90 25.9 p99 75.0 max 78.0 (seed 135); >20 mm: 107 of 400
+black xy displacement mm, seeds with normal 1000-step settle: max 2.5627 (n=260)
+black xy displacement mm, seeds with extended settle: p50 0.04 max 2.79 (n=140)

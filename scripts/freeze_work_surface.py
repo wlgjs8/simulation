@@ -36,21 +36,44 @@ def main():
         for seed in range(args.seed,args.seed+args.count):
             placements=scene.bolt_poses(args.layout,runtime.n_per_color,seed)
             for path,(_,x,y,yaw) in zip(bolt_prims,placements):
+                # dropped level from just above the largest head radius (a pre-tilted drop at the rest
+                # angle was tried for the button heads and did not reduce their settling roll)
                 bolt_views[path].set_world_poses(
-                    np.array([[x,y,scene.PICK_SURFACE_Z+scene.HEAD_R+.001]]),
+                    np.array([[x,y,scene.PICK_SURFACE_Z+scene.bolt_max_radius()+.001]]),
                     np.array([[math.cos(yaw/2),0,0,math.sin(yaw/2)]]))
                 bolt_views[path].set_velocities(np.zeros((1,6)))
             for _ in range(1000):world.step(render=False)
-            poses=[];speeds=[]
+            def bolt_speeds():
+                return [float(np.linalg.norm(np.asarray(bolt_views[path].get_velocities())[0,:3]))
+                        for path in bolt_prims]
+            # The historical cylinders always settled inside 1000 steps, so their scenes are unchanged.
+            # A button-head bolt lies on its dome rim and shaft tip like a cone and can keep rolling
+            # in place with no rolling friction; any roll angle is an equilibrium, so stepping on until
+            # it stops (and freezing it at rest) is faithful. Capped so a genuinely unstable scene fails.
+            extra=0
+            while max(bolt_speeds())>.01 and extra<6000:
+                for _ in range(250):world.step(render=False)
+                extra+=250
+            poses=[];speeds=bolt_speeds()
             for path in bolt_prims:
                 p,q=bolt_views[path].get_world_poses()
                 poses.append(dict(p=np.asarray(p)[0].tolist(),q=np.asarray(q)[0].tolist()))
-                speeds.append(float(np.linalg.norm(np.asarray(bolt_views[path].get_velocities())[0,:3])))
-            check=scene.work_surface.verify_bolts(scene.WORK_SURFACE,scene.TABLE_Z,poses)
-            if max(speeds)>.01:raise RuntimeError(f'seed {seed}: bolts did not settle: {max(speeds)} m/s')
-            captured[str(seed)]=dict(layout=args.layout,colors=[p[0] for p in placements],
+            if extra:
+                print(f'[freeze-pad] seed {seed}: settled after {1000+extra} steps', flush=True)
+            colors=[p[0] for p in placements]
+            check=scene.work_surface.verify_bolts(scene.WORK_SURFACE,scene.TABLE_Z,poses,
+                                                  [scene.bolt_aabb_proxies(c) for c in colors])
+            if max(speeds)>.01:
+                slow=[(bolt_prims[i].rsplit('/',1)[-1],round(v,3)) for i,v in enumerate(speeds) if v>.01]
+                raise RuntimeError(f'seed {seed}: bolts did not settle after {1000+extra} steps: {slow}')
+            captured[str(seed)]=dict(layout=args.layout,colors=colors,
                 work_surface=scene.WORK_SURFACE,bolts=poses,
                 support_check=check,max_linear_speed_m_s=max(speeds))
+            if extra:
+                captured[str(seed)]['settle_steps']=1000+extra
+            if scene.bolt_geometry_metadata() is not None:
+                # frozen poses are only valid for the geometry that settled them; the rig refuses a mismatch
+                captured[str(seed)]['bolt_geometry']=scene.bolt_geometry_metadata()
             print(f'[freeze-pad] seed {seed}: {check}',flush=True)
         target.parent.mkdir(parents=True,exist_ok=True)
         with target.open('x') as f:json.dump(captured,f,indent=1)

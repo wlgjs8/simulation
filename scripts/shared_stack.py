@@ -82,7 +82,7 @@ def run_episode(args, settings, scene, world, rep, arts, cameras, tcp_views,
         raise ValueError(f"scene must contain {args.n_per_color} bolts of each color: {color_counts}")
     visual_bindings = []
     for i, (path, (_, x, y, yaw)) in enumerate(zip(bolt_prims, poses)):
-        start_z = scene.PICK_SURFACE_Z + (scene.HEAD_R + 0.001 if 'size_m' in scene.WORK_SURFACE
+        start_z = scene.PICK_SURFACE_Z + (scene.bolt_max_radius() + 0.001 if 'size_m' in scene.WORK_SURFACE
                                           else scene.SHAFT_R + 0.002)
         pos = frozen["bolts"][i]["p"] if frozen else [x, y, start_z]
         quat = frozen["bolts"][i]["q"] if frozen else [math.cos(yaw/2), 0, 0, math.sin(yaw/2)]
@@ -92,9 +92,12 @@ def run_episode(args, settings, scene, world, rep, arts, cameras, tcp_views,
         # reset assigns visual materials; this independent reset must too.
         # Reuse those exact materials, keeping physics-purpose bindings intact.
         material = materials["bolt_" + colors[i]]
-        parts = ["shaft", "head"]
-        if world.stage.GetPrimAtPath(f"{path}/thread").IsValid():
-            parts.append("thread")      # render-only threaded shaft (EVAL_BOLT_VISUAL=threaded)
+        built = world.stage.GetPrimAtPath(path).GetAttribute("simulation:boltColor")
+        if built and built.Get() != colors[i]:
+            # EVAL_BOLT_GEOMETRY binds a head shape to a bolt index at build time
+            raise RuntimeError(f"{path} was built as a {built.Get()} bolt but this scene makes it {colors[i]}")
+        parts = ["shaft", "head"] + [part for part in ("thread", "head_visual")
+                                      if world.stage.GetPrimAtPath(f"{path}/{part}").IsValid()]
         for part in parts:
             prim = world.stage.GetPrimAtPath(f"{path}/{part}")
             binding = UsdShade.MaterialBindingAPI.Apply(prim)
@@ -110,6 +113,8 @@ def run_episode(args, settings, scene, world, rep, arts, cameras, tcp_views,
                           world.stage, scene.WORK_SURFACE, scene.TABLE_Z),
                       "pick_surface_z_m": scene.PICK_SURFACE_Z,
                       "bolt_colors": colors, "bolt_color_counts": color_counts,
+                      "bolt_geometry": scene.bolt_geometry_metadata(),
+                      "bolt_proxies": [scene.bolt_aabb_proxies(c) for c in colors],
                       "visual_bindings": visual_bindings}
     bounds = UsdGeom.BBoxCache(Usd.TimeCode.Default(), ['default','render','proxy'])
     tray_geometry = {}
@@ -141,7 +146,7 @@ def run_episode(args, settings, scene, world, rep, arts, cameras, tcp_views,
         initial_bolts.append(dict(p=np.asarray(p)[0].tolist(),q=np.asarray(q)[0].tolist()))
     if 'size_m' in scene.WORK_SURFACE:
         scene_metadata['support_check'] = scene.work_surface.verify_bolts(
-            scene.WORK_SURFACE, scene.TABLE_Z, initial_bolts)
+            scene.WORK_SURFACE, scene.TABLE_Z, initial_bolts, scene_metadata['bolt_proxies'])
     scene_metadata['initial_bolts'] = initial_bolts
     (out / 'scene_materials.json').write_text(json.dumps(scene_metadata, indent=2))
 
