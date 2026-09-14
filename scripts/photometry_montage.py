@@ -34,7 +34,11 @@ ORDER = ["A_stock", "B_tonemap", "C_light", "D_fit"]
 TITLES = {"real": "실기 (flow_obs_am)", "A_stock": "A 기존 리그", "B_tonemap": "B +톤매퍼 op0",
           "C_light": "C +조명 (dome·창문 sun)", "D_fit": "D +재질 = t013",
           "E_fit_stockbolt": "E = D, 회색 볼트만 스톡", "F_stock_fitbolt": "F = A + t013 회색 볼트",
-          "G_fit_iray": "G = t013 조명·재질 + Iray 톤매퍼"}
+          "G_fit_iray": "G = t013 조명·재질 + Iray 톤매퍼",
+          "A_plain": "A 기존 · 원통 볼트", "A_threaded": "A 기존 · 나사산",
+          "G_plain": "G · 원통 볼트", "G_threaded": "G · 나사산",
+          "A_thr_dlssPerf": "A 나사산 · DLSS Perf (기본, 320×240)", "A_thr_dlssQual": "A 나사산 · DLSS Quality",
+          "A_thr_dlaa": "A 나사산 · DLAA (640×480)", "G_thr_dlaa": "G 나사산 · DLAA"}
 
 
 def lum(rgb):

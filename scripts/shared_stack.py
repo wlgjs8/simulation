@@ -92,7 +92,10 @@ def run_episode(args, settings, scene, world, rep, arts, cameras, tcp_views,
         # reset assigns visual materials; this independent reset must too.
         # Reuse those exact materials, keeping physics-purpose bindings intact.
         material = materials["bolt_" + colors[i]]
-        for part in ("shaft", "head"):
+        parts = ["shaft", "head"]
+        if world.stage.GetPrimAtPath(f"{path}/thread").IsValid():
+            parts.append("thread")      # render-only threaded shaft (EVAL_BOLT_VISUAL=threaded)
+        for part in parts:
             prim = world.stage.GetPrimAtPath(f"{path}/{part}")
             binding = UsdShade.MaterialBindingAPI.Apply(prim)
             binding.Bind(material)

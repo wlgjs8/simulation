@@ -1,0 +1,10 @@
+{
+  "every_sec": 1.0,
+  "about": "Threaded bolts through the wrist renderer's resolution: Kit's default DLSS Performance (renders 320x240 and upscales), DLSS Quality (execMode 2), and DLAA (aa op 4, native 640x480), under the stock rig and G.",
+  "variants": [
+    {"label": "A_thr_dlssPerf", "bolt_visual": "threaded"},
+    {"label": "A_thr_dlssQual", "bolt_visual": "threaded", "env": {"EVAL_RTX": "/rtx/post/dlss/execMode=2"}},
+    {"label": "A_thr_dlaa", "bolt_visual": "threaded", "env": {"EVAL_RTX": "/rtx/post/aa/op=4"}},
+    {"label": "G_thr_dlaa", "bolt_visual": "threaded", "preset": "config/photometry/sep_G_fit_iray_20260914.json", "env": {"EVAL_RTX": "/rtx/post/aa/op=4"}}
+  ]
+}

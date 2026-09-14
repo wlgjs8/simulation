@@ -279,6 +279,20 @@ for _item in os.environ.get("EVAL_MAT", "").split(";"):
         tuple(float(v) for v in _rhs.split(",")) if _field == "rgb" else float(_rhs))
 
 
+# --- bolt appearance -----------------------------------------------------------------
+# The bolts are two smooth cylinders that are both the collider and what the cameras see. Every
+# bolt on the robot is threaded along its whole shaft, and at pre-grasp range the thread is one of
+# its most visible features. EVAL_BOLT_VISUAL=threaded adds a render-only threaded shaft mesh
+# (scripts/bolt_visual.py, ISO 68-1 basic profile, M12 coarse pitch 1.75 mm, envelope = the collider)
+# and hides the shaft cylinder from rendering by giving it purpose "guide". The cylinder stays the
+# collider, so contact, mass, frozen scene states and everything physical are unchanged -- a
+# threaded board differs from a plain one by the pixels alone. Empty = the plain cylinders.
+BOLT_VISUAL = os.environ.get("EVAL_BOLT_VISUAL", "").strip()
+if BOLT_VISUAL not in ("", "threaded"):
+    raise SystemExit(f"EVAL_BOLT_VISUAL: unknown value {BOLT_VISUAL!r} (expected '' or 'threaded')")
+BOLT_PITCH = 0.00175
+
+
 def photometry_metadata() -> dict:
     """Everything that decides what the wrist cameras see, for run provenance."""
     return {"preset": PHOTOMETRY_PRESET or None, "preset_sha256": PHOTOMETRY_PRESET_SHA256,
@@ -287,7 +301,8 @@ def photometry_metadata() -> dict:
             "light": {"key": KEY_INTENSITY, "key_angle": KEY_ANGLE, "dome": DOME_INTENSITY,
                       "sun": SUN_INTENSITY, "sun_angle": SUN_ANGLE,
                       "sun_az": SUN_AZIMUTH, "sun_el": SUN_ELEVATION},
-            "material_overrides": {k: dict(v) for k, v in _MAT_OVERRIDE.items()}}
+            "material_overrides": {k: dict(v) for k, v in _MAT_OVERRIDE.items()},
+            "bolt_visual": BOLT_VISUAL or "plain"}
 
 
 MEASURED_OPTICS = (17.8885, 13.4524)
@@ -1424,7 +1439,7 @@ def main() -> int:
     from isaacsim.sensors.camera import Camera
     from openpi_client import websocket_client_policy
     from PIL import Image
-    from pxr import Gf, Sdf, Usd, UsdGeom, UsdLux, UsdPhysics, UsdShade
+    from pxr import Gf, Sdf, Usd, UsdGeom, UsdLux, UsdPhysics, UsdShade, Vt
 
     outdir = ROOT / "outputs/eval"
     outdir.mkdir(parents=True, exist_ok=True)
@@ -1552,6 +1567,21 @@ def main() -> int:
 
     n_bolts = args.n_per_color * 2
     bolt_prims = []
+    if BOLT_VISUAL == "threaded":
+        # One prototype under a class prim (never rendered itself); each bolt references it.
+        import bolt_visual
+        _pts, _cnt, _idx, _nrm = bolt_visual.threaded_shaft_mesh(2 * SHAFT_R, SHAFT_L, BOLT_PITCH)
+        stage.CreateClassPrim("/_bolt_proto")
+        _m = UsdGeom.Mesh.Define(stage, "/_bolt_proto/shaft_thread")
+        _m.CreatePointsAttr(Vt.Vec3fArray.FromNumpy(_pts.astype(np.float32)))
+        _m.CreateFaceVertexCountsAttr(Vt.IntArray.FromNumpy(_cnt))
+        _m.CreateFaceVertexIndicesAttr(Vt.IntArray.FromNumpy(_idx))
+        _m.CreateNormalsAttr(Vt.Vec3fArray.FromNumpy(_nrm.astype(np.float32)))
+        _m.SetNormalsInterpolation(UsdGeom.Tokens.vertex)
+        _m.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
+        _m.CreateExtentAttr(Vt.Vec3fArray([Gf.Vec3f(*_pts.min(0)), Gf.Vec3f(*_pts.max(0))]))
+        print(f"  [bolt] threaded shaft visual: {len(_pts)} verts, {len(_cnt)} faces, "
+              f"pitch {BOLT_PITCH * 1000:.2f} mm; shaft collider hidden (purpose guide)", flush=True)
     for i in range(n_bolts):
         path = f"/World/scene/bolt_{i:02d}"
         xf = UsdGeom.Xform.Define(stage, path)
@@ -1567,6 +1597,8 @@ def main() -> int:
             cy_.CreateAxisAttr("X")
             UsdGeom.Xformable(cy_).AddTranslateOp().Set(Gf.Vec3d(cx, 0, 0))
             UsdPhysics.CollisionAPI.Apply(cy_.GetPrim())
+            if BOLT_VISUAL == "threaded" and tag == "shaft":
+                cy_.CreatePurposeAttr(UsdGeom.Tokens.guide)
             # The bolts have never had a physics material -- friction and restitution have been
             # whatever PhysX defaults to (0.5/0.5/0). On a task that is entirely about pinching a
             # smooth cylinder, that is an unexamined parameter, so make it explicit and tunable.
@@ -1575,6 +1607,9 @@ def main() -> int:
                 UsdShade.MaterialBindingAPI(cy_.GetPrim()).Bind(
                     UsdShade.Material(_PHYSMAT), bindingStrength=UsdShade.Tokens.weakerThanDescendants,
                     materialPurpose="physics")
+        if BOLT_VISUAL == "threaded":
+            stage.DefinePrim(f"{path}/thread").GetReferences().AddInternalReference(
+                "/_bolt_proto/shaft_thread")
         bolt_prims.append(path)
 
     # FINGERTIP / TABLE FRICTION. (Placed AFTER scene build: the first version ran before
@@ -2316,6 +2351,9 @@ def main() -> int:
                 MAT["bolt_gray" if colors[i] == "gray" else "bolt_black"])
             UsdShade.MaterialBindingAPI(stage.GetPrimAtPath(path + "/head")).Bind(
                 MAT["bolt_gray" if colors[i] == "gray" else "bolt_black"])
+            if stage.GetPrimAtPath(path + "/thread").IsValid():
+                UsdShade.MaterialBindingAPI.Apply(stage.GetPrimAtPath(path + "/thread")).Bind(
+                    MAT["bolt_gray" if colors[i] == "gray" else "bolt_black"])
         frozen = None
         if args.scene_states:
             frozen = _SCENE_STATES.get(str(ep_seed))

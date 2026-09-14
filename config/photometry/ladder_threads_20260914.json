@@ -1,0 +1,10 @@
+{
+  "every_sec": 1.0,
+  "about": "Render-only threaded bolt shafts against the plain cylinders, under the stock rig (A) and the replication winner (G). The episode runs with EVAL_BOLT_VISUAL=threaded; the collider is the same cylinder in every column.",
+  "variants": [
+    {"label": "A_plain", "bolt_visual": "plain"},
+    {"label": "A_threaded", "bolt_visual": "threaded"},
+    {"label": "G_plain", "preset": "config/photometry/sep_G_fit_iray_20260914.json", "bolt_visual": "plain"},
+    {"label": "G_threaded", "preset": "config/photometry/sep_G_fit_iray_20260914.json", "bolt_visual": "threaded"}
+  ]
+}

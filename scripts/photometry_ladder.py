@@ -20,6 +20,9 @@ A variant's env uses the eval_closed_loop knob names (EVAL_RTX, EVAL_MAT, EVAL_K
 stock value captured from the running stage. "exposure_match": L scales the key/dome/sun
 intensities once, at the first snapshot, until the pooled median luminance of both wrists equals
 variant L's at that snapshot, and then holds that scale -- a fixed exposure, like the railed D405.
+"bolt_visual": "plain" | "threaded" switches the bolts between the cylinder look and the render-only
+threaded shaft; it needs the episode launched with EVAL_BOLT_VISUAL=threaded so the thread prims
+exist (the collider is the same cylinder either way).
 
 The episode itself must be launched with NO photometry knobs, so that "stock" is what the stage
 holds when the hook is installed; this is checked.
@@ -142,11 +145,19 @@ def instrumented(args, settings, scene, world, rep, arts, cameras, tcp_views,
                 raise SystemExit(f"ladder variant {v['label']}: unknown material {n}")
             mat[n].update(fields)
         variants.append({"label": v["label"], "rtx": rtx, "light": light, "mat": mat,
-                         "exposure_match": v.get("exposure_match"), "scale": 1.0})
+                         "exposure_match": v.get("exposure_match"), "scale": 1.0,
+                         "bolt_visual": v.get("bolt_visual")})
     for k in {k for v in variants for k in v["rtx"]}:
         stock["rtx"][k] = st.get(k)
+    threads = {p: stage.GetPrimAtPath(f"{p}/thread") for p in bolt_prims}
+    has_threads = all(t.IsValid() for t in threads.values())
+    if any(v["bolt_visual"] for v in variants) and not has_threads:
+        raise SystemExit("ladder: a variant sets bolt_visual but the episode has no thread prims; "
+                         "launch it with EVAL_BOLT_VISUAL=threaded")
+    stock["bolt_visual"] = "threaded" if has_threads else "plain"
     stock_variant = {"label": "_stock", "rtx": {k: str(x) for k, x in stock["rtx"].items()},
-                     "light": stock["light"], "mat": stock["mat"], "scale": 1.0}
+                     "light": stock["light"], "mat": stock["mat"], "scale": 1.0,
+                     "bolt_visual": stock["bolt_visual"]}
 
     # ---- applying a state -----------------------------------------------------------------------
     def set_carb(k, raw):
@@ -162,6 +173,13 @@ def instrumented(args, settings, scene, world, rep, arts, cameras, tcp_views,
             raise RuntimeError(f"carb {k} did not take {val!r} (reads {st.get(k)!r})")
 
     def apply(v):
+        if has_threads:
+            threaded = (v.get("bolt_visual") or stock["bolt_visual"]) == "threaded"
+            for p, t in threads.items():
+                UsdGeom.Imageable(t).CreatePurposeAttr().Set(
+                    UsdGeom.Tokens.default_ if threaded else UsdGeom.Tokens.guide)
+                UsdGeom.Imageable(stage.GetPrimAtPath(f"{p}/shaft")).CreatePurposeAttr().Set(
+                    UsdGeom.Tokens.guide if threaded else UsdGeom.Tokens.default_)
         for k in stock["rtx"]:
             set_carb(k, v["rtx"].get(k, stock["rtx"][k]))
         L, s = v["light"], v["scale"]
