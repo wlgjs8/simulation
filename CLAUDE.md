@@ -39,6 +39,9 @@
   A→G p=0.007이다. 두 배치 합산 A→G 72→99(31/12, p=0.005), D→G 우팔 12→35, D→E 좌팔 37→69로 재현됐다.
   운반 중 박스 밖 놓기는 E에서 재현되지 않았고(0.16→0.40), t013 회색 볼트 재질이 있는 D·F·G에서만
   일관되게 낮다. 즉 볼트 재질에 반응한다. G가 채점 광도 후보이지만, 기준 교체는 아직 결정하지 않았다.
+  **실기 후보 11개 G 보드([all11_G](docs/results/20260915/all11_G/README.md))**: devjit_r6 52 ≈ r6knormcrop 51 >
+  ph3 43 > plain_first 39 > griponly 36 > griponly_r6 34 > plain_r4 29 > r6knorm·veldrop50 28 > **devjit_r7 25** > plain_r5 23.
+  r7의 결손은 전부 좌팔이다(좌 박스 밖 놓기 0.74 vs r6 0.14). devjit_r6는 G 조건 세 배치에서 46/53/52로 안정적이다.
 - **볼트 외형**: `EVAL_BOLT_VISUAL=threaded`는 렌더 전용 M12 나사산을 넣는다(충돌 원통은 숨겨서 유지,
   seed 100 초기 자세가 기존 보드와 완전히 같다). 기본값은 원통이다. 실기 회색 볼트는 **버튼 헤드**라서
   `EVAL_BOLT_GEOMETRY=config/bolts/iso_heads_20260914.json`(회색 돔 볼록 껍질 충돌체 16.4 g, 검정 널링·육각 렌더,

@@ -1,0 +1,11 @@
+boltv2_40k                         p50   72.0  p90   92.2  p99  107.4 ms
+boltv2_griponly_40k                p50   71.2  p90   91.4  p99  119.8 ms
+boltv2_griponly_devjit_r7_40k      p50   73.6  p90   96.6  p99  123.5 ms
+boltv2_griponly_r6_40k             p50   70.2  p90   88.5  p99  118.1 ms
+boltv2_griponly_r6knormcrop_40k    p50   73.6  p90   96.1  p99  123.6 ms
+boltv2_plain_40k                   p50   69.7  p90   88.4  p99  115.6 ms
+boltv2ph3_40k                      p50   73.8  p90   96.1  p99  119.6 ms
+boltv2_griponly_devjit_40k         p50   69.0  p90   88.8  p99  117.9 ms
+boltv2_griponly_r6knorm_40k        p50   69.1  p90   88.8  p99  118.5 ms
+boltv2_r5_40k                      p50   70.0  p90   87.9  p99   97.4 ms
+boltv2_veldrop50_40k               p50   70.9  p90   92.1  p99  108.2 ms
