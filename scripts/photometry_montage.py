@@ -32,7 +32,9 @@ FONT = "/usr/share/fonts/truetype/nanum/NanumSquareB.ttf"
 BINS = np.arange(0, 257, 4)
 ORDER = ["A_stock", "B_tonemap", "C_light", "D_fit"]
 TITLES = {"real": "실기 (flow_obs_am)", "A_stock": "A 기존 리그", "B_tonemap": "B +톤매퍼 op0",
-          "C_light": "C +조명 (dome·창문 sun)", "D_fit": "D +재질 = t013"}
+          "C_light": "C +조명 (dome·창문 sun)", "D_fit": "D +재질 = t013",
+          "E_fit_stockbolt": "E = D, 회색 볼트만 스톡", "F_stock_fitbolt": "F = A + t013 회색 볼트",
+          "G_fit_iray": "G = t013 조명·재질 + Iray 톤매퍼"}
 
 
 def lum(rgb):
@@ -112,7 +114,7 @@ def montage(picks_path, out_path, w=480, h=360, crops_only=False, sat_overlay=Fa
     return out_path
 
 
-def stats(ladder_dirs, ref_path):
+def stats(ladder_dirs, ref_path, labels=ORDER):
     ref = json.loads(Path(ref_path).read_text())
     bins = np.asarray(ref["bins"], dtype=float)
     out = {}
@@ -122,7 +124,7 @@ def stats(ladder_dirs, ref_path):
         rq = {q: float(bins[np.searchsorted(ref_c, q)]) for q in (0.10, 0.50, 0.90)}
         out[arm] = {"reference": {"p10": rq[0.10], "p50": rq[0.50], "p90": rq[0.90],
                                   "sat_pct": round(float(ref_h[-1] * 100), 2)}}
-        for lab in ORDER:
+        for lab in labels:
             H = np.zeros(len(bins) - 1)
             n = 0
             for d in ladder_dirs:
@@ -147,6 +149,7 @@ def main():
     ap.add_argument("--picks", type=Path)
     ap.add_argument("--out", type=Path)
     ap.add_argument("--stats", nargs="*", type=Path, help="ladder dirs to pool")
+    ap.add_argument("--labels", default=",".join(ORDER), help="variant labels to pool for --stats")
     ap.add_argument("--reference", type=Path,
                     default=ROOT / "docs/results/20260912/photometry_fit/real_hist.json")
     args = ap.parse_args()
@@ -159,7 +162,7 @@ def main():
         print(montage(args.picks, args.out.with_name(args.out.stem + "_saturation" + args.out.suffix),
                       sat_overlay=True))
     if args.stats:
-        print(json.dumps(stats(args.stats, args.reference), indent=1, ensure_ascii=False))
+        print(json.dumps(stats(args.stats, args.reference, args.labels.split(",")), indent=1, ensure_ascii=False))
 
 
 if __name__ == "__main__":

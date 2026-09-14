@@ -1,0 +1,17 @@
+{
+  "every_sec": 1.0,
+  "about": "Same-view check of the replication winner: stock rig (A), the whole-frame fit (D) and G = D with Kit's Iray tonemapper (intensities x 270.1). No exposure matching -- every column is exactly the preset the boards ran.",
+  "variants": [
+    {
+      "label": "A_stock"
+    },
+    {
+      "label": "D_fit",
+      "preset": "config/photometry/cell_fit_20260912_t013.json"
+    },
+    {
+      "label": "G_fit_iray",
+      "preset": "config/photometry/sep_G_fit_iray_20260914.json"
+    }
+  ]
+}
