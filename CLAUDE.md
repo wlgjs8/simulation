@@ -45,9 +45,11 @@
 - **볼트 외형**: `EVAL_BOLT_VISUAL=threaded`는 렌더 전용 M12 나사산을 넣는다(충돌 원통은 숨겨서 유지,
   seed 100 초기 자세가 기존 보드와 완전히 같다). 기본값은 원통이다. 실기 회색 볼트는 **버튼 헤드**라서
   `EVAL_BOLT_GEOMETRY=config/bolts/iso_heads_20260914.json`(회색 돔 볼록 껍질 충돌체 16.4 g, 검정 널링·육각 렌더,
-  둘 다 나사산)로 반영했다. 반드시 `assets/scene_states40_aligned_rb5_foam_isoheads.json`과 함께 쓴다(형상이
-  다른 배치 파일은 거부된다). **치수는 M12 규격표 임시값이고, 이 형상의 보드는 아직 없다**
-  ([bolt_heads](docs/results/20260914/bolt_heads/README.md)). 손목 카메라는 Isaac 기본 DLSS
+  둘 다 나사산)로 반영했다. **현재 형상은 실측 `config/bolts/measured_20260915.json`이다**: 회색 ISO 7380-1
+  M12×20(머리 20.5×6.0, 13.7 g), 검정 ISO 4762 M12×25(머리 18.0×12, 22 g). 반드시
+  `assets/scene_states40_aligned_rb5_foam_measured.json`과 함께 쓴다(형상이 다른 배치 파일은 거부된다).
+  이 형상의 보드는 아직 없다([bolt_measured](docs/results/20260915/bolt_measured/README.md); 임시 형상
+  `iso_heads_20260914`는 이전 기록이다). 손목 카메라는 Isaac 기본 DLSS
   Performance라 320×240에서 업스케일된다(원본 해상도는 `EVAL_RTX=/rtx/post/aa/op=4`).
   [bolt_threads](docs/results/20260914/bolt_threads/README.md)
 - bias 0 기준 seed 100의 30초 결과는 8001 회색 1개, 8002 안착 0개,

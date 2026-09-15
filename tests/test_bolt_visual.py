@@ -114,3 +114,35 @@ class HeadTest(unittest.TestCase):
             json.dump(bad, f)
         with self.assertRaises(ValueError):
             bolt_visual.load_geometry(f.name)
+
+
+MEASURED = pathlib.Path(__file__).resolve().parents[1] / "config/bolts/measured_20260915.json"
+
+
+class MeasuredSpecTest(unittest.TestCase):
+    """The caliper-measured spec must stay inside the ISO parts it was matched to."""
+
+    def setUp(self):
+        self.spec = bolt_visual.load_geometry(MEASURED)
+
+    def test_gray_is_iso_7380_1_m12x20(self):
+        g = self.spec["gray"]
+        self.assertEqual((g["d_m"], g["length_m"]), (0.012, 0.020))
+        self.assertTrue(0.02048 <= g["head_d_m"] <= 0.02100)
+        R, k, e, rt = g["head_d_m"] / 2, g["head_k_m"], g["edge_h_m"], g["top_flat_r_m"]
+        c = (R ** 2 + e ** 2 - rt ** 2 - k ** 2) / (2 * (k - e))
+        self.assertTrue(0.01050 <= math.hypot(R, e + c) <= 0.01120)     # ISO r_f
+        self.assertGreater(rt, g["socket_s_m"] / math.sqrt(3))          # the socket fits in the top flat
+
+    def test_black_is_iso_4762_m12x25(self):
+        b = self.spec["black"]
+        self.assertEqual((b["d_m"], b["length_m"]), (0.012, 0.025))
+        self.assertTrue(0.01773 <= b["head_d_m"] <= 0.01827)
+        self.assertTrue(0.01157 <= b["head_k_m"] <= 0.01200)
+        pts = bolt_visual.socket_cap_head_mesh(b, b["d_m"])[0]
+        r = np.hypot(pts[:, 1], pts[:, 2])
+        ch = b["chamfer_m"]
+        side = (pts[:, 0] <= -ch + 1e-9) & (pts[:, 0] >= -b["head_k_m"] + ch - 1e-9) & (r > 0.008)
+        # knurl valleys reach the measured 17.5 mm, crests the 18.0 mm collider
+        self.assertAlmostEqual(2 * r[side].min(), 0.0175, places=5)
+        self.assertAlmostEqual(2 * r[side].max(), 0.0180, places=5)

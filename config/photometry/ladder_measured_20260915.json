@@ -1,0 +1,8 @@
+{
+  "every_sec": 1.0,
+  "about": "Visual check of EVAL_BOLT_GEOMETRY=config/bolts/measured_20260915.json (caliper-measured: gray ISO 7380-1 M12x20 button head, black ISO 4762 M12x25 socket cap) under the stock rig (A) and G.",
+  "variants": [
+    {"label": "A_measured"},
+    {"label": "G_measured", "preset": "config/photometry/sep_G_fit_iray_20260914.json"}
+  ]
+}

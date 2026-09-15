@@ -1,0 +1,7 @@
+gray xy displacement mm: p50 2.3 p90 21.0 p99 51.0 max 68.0 (seed 110); >20 mm: 105 of 400
+black xy displacement mm, seeds with normal 1000-step settle: max 2.0881 (n=370)
+black xy displacement mm, seeds with extended settle: p50 0.09 max 0.15 (n=30)
+gray: rest tilt p50 -11.5 deg
+black: rest tilt p50 -6.8 deg
+seeds needing extended settle: {'105': 1250, '110': 2000, '135': 1500}
+support offsets mm: -0.259 -0.015

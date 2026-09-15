@@ -1,0 +1,29 @@
+{
+  "schema": "simulation.bolt_geometry.v1",
+  "name": "measured_20260915",
+  "status": "MEASURED -- operator calipers on the real bolts (2026-09-15), matched to ISO 7380-1 M12x20 (gray) and ISO 4762 M12x25 (black); masses still scaled, not weighed",
+  "evidence": "docs/results/20260915/bolt_measured/README.md",
+  "pitch_m": 0.00175,
+  "thread": true,
+  "mass_reference": {"color": "black", "mass_kg": 0.022, "note": "the rig's historical 22 g; gray is scaled by collider volume until the parts are weighed"},
+  "black": {
+    "head": "socket_cap",
+    "standard": "ISO 4762 M12x25: dk 17.73-18.00 (knurled max 18.27), k 11.57-12.00, s 10, t min 6",
+    "measured": "thread d 12, length 25; head diameter 17.5-18 (knurl valleys to crests), height 12",
+    "d_m": 0.012, "length_m": 0.025,
+    "head_d_m": 0.018, "head_k_m": 0.012,
+    "socket_s_m": 0.010, "socket_depth_m": 0.006,
+    "chamfer_m": 0.0006, "knurl_ridges": 72, "knurl_depth_m": 0.00025,
+    "mass_kg": 0.022
+  },
+  "gray": {
+    "head": "button",
+    "standard": "ISO 7380-1 M12x20: dk 20.48-21.00, dL ref 12.0, k 6.24-6.60, dome radius rf 10.50-11.20, s 8, t min 4.16",
+    "measured": "thread d 12, length 20; head bottom diameter 20.5, top diameter 11, height 6",
+    "d_m": 0.012, "length_m": 0.020,
+    "head_d_m": 0.0205, "head_k_m": 0.006,
+    "socket_s_m": 0.008, "socket_depth_m": 0.0042,
+    "edge_h_m": 0.0003, "top_flat_r_m": 0.0055,
+    "mass_kg": "scale_by_collider_volume"
+  }
+}
