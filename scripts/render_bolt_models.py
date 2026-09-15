@@ -16,7 +16,9 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--geometry", required=True)
+    ap.add_argument("--geometry", default=None, help="bolt geometry spec; omit with --legacy")
+    ap.add_argument("--legacy", action="store_true",
+                    help="render the historical two-cylinder bolt (shaft 12x25, head 18.4x12) for both colours")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -33,8 +35,14 @@ def main() -> int:
     sys.path.insert(0, str(ROOT / "scripts"))
     import bolt_visual
 
-    spec = bolt_visual.load_geometry(ROOT / args.geometry if not pathlib.Path(args.geometry).is_absolute()
-                                     else args.geometry)
+    if args.legacy == bool(args.geometry):
+        ap.error("give exactly one of --geometry or --legacy")
+    if args.legacy:
+        cyl = {"head": "cylinder", "d_m": 0.012, "length_m": 0.025, "head_d_m": 0.0184, "head_k_m": 0.012}
+        spec = {"name": "historical cylinders", "gray": cyl, "black": cyl}
+    else:
+        spec = bolt_visual.load_geometry(ROOT / args.geometry if not pathlib.Path(args.geometry).is_absolute()
+                                         else args.geometry)
     world = World(stage_units_in_meters=1.0)
     stage = get_current_stage()
 
@@ -68,9 +76,16 @@ def main() -> int:
         xf = UsdGeom.Xform.Define(stage, path)
         xf.AddTranslateOp().Set(Gf.Vec3d(*translate))
         xf.AddRotateXYZOp().Set(Gf.Vec3f(*rotate_xyz))
-        mesh(f"{path}/thread", bolt_visual.threaded_shaft_mesh(c["d_m"], c["length_m"], spec["pitch_m"]))
-        mesh(f"{path}/head", bolt_visual.button_head_mesh(c, c["d_m"]) if c["head"] == "button"
-             else bolt_visual.socket_cap_head_mesh(c, c["d_m"]))
+        if c["head"] == "cylinder":
+            for tag, r, h, cx in (("shaft", c["d_m"] / 2, c["length_m"], c["length_m"] / 2),
+                                  ("head", c["head_d_m"] / 2, c["head_k_m"], -c["head_k_m"] / 2)):
+                cy = UsdGeom.Cylinder.Define(stage, f"{path}/{tag}")
+                cy.CreateRadiusAttr(r); cy.CreateHeightAttr(h); cy.CreateAxisAttr("X")
+                UsdGeom.Xformable(cy).AddTranslateOp().Set(Gf.Vec3d(cx, 0, 0))
+        else:
+            mesh(f"{path}/thread", bolt_visual.threaded_shaft_mesh(c["d_m"], c["length_m"], spec["pitch_m"]))
+            mesh(f"{path}/head", bolt_visual.button_head_mesh(c, c["d_m"]) if c["head"] == "button"
+                 else bolt_visual.socket_cap_head_mesh(c, c["d_m"]))
         UsdShade.MaterialBindingAPI.Apply(xf.GetPrim()).Bind(mats[color])
 
     floor = UsdGeom.Cube.Define(stage, "/World/floor")

@@ -53,9 +53,6 @@ class ThreadedShaftTest(unittest.TestCase):
         self.assertGreater(np.mean(np.sum(self.nrm[:-2][side, 1:] * radial[side], axis=1) > 0), 0.99)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 GEOM = pathlib.Path(__file__).resolve().parents[1] / "config/bolts/iso_heads_20260914.json"
 
@@ -146,3 +143,18 @@ class MeasuredSpecTest(unittest.TestCase):
         # knurl valleys reach the measured 17.5 mm, crests the 18.0 mm collider
         self.assertAlmostEqual(2 * r[side].min(), 0.0175, places=5)
         self.assertAlmostEqual(2 * r[side].max(), 0.0180, places=5)
+
+
+class MeasuredMassTest(unittest.TestCase):
+    def test_weighed_masses_are_used_as_given(self):
+        spec = bolt_visual.load_geometry(MEASURED)
+        self.assertEqual(spec["black"]["mass_kg_effective"], 0.035)
+        self.assertEqual(spec["gray"]["mass_kg_effective"], 0.023)
+        # a steel bolt is lighter than its solid collider (thread roots and the socket are empty)
+        for c in ("gray", "black"):
+            steel = spec[c]["mass_kg_effective"] / 7850.0
+            self.assertTrue(0.6 < steel / spec[c]["collider_volume_m3"] < 1.0)
+
+
+if __name__ == "__main__":
+    unittest.main()
